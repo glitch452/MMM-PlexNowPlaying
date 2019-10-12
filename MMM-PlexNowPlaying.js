@@ -144,11 +144,11 @@ Module.register("MMM-PlexNowPlaying", {
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4) {
         if (this.status == 200) {
-          self.log(self.translate("DATA_SUCCESS", { "numberOfAttempts": payload.original.attemptNum }));
+          self.log(self.translate("DATA_SUCCESS", { "numberOfAttempts": attemptNum }));
           self.parseData(this.responseText);
           self.updateDom();
         } else {
-          self.log(this.status + ": " + this.statusText, "warn");
+          self.log("Error: " + this.status + ": " + this.statusText, "warn");
           self.log(self.translate("DATA_FAILURE_RETRY", { "retryTimeInSeconds": (self.config.retryDelay / 1000) }), "warn");
           setTimeout(function() { self.getData(attemptNum + 1); }, self.config.retryDelay);
         }
