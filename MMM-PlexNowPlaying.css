@@ -1,0 +1,82 @@
+ /**
+ * Magic Mirror
+ * Module Style Sheet: MMM-PlexNowPlaying
+ *
+ * By David Dearden
+ * MIT Licensed.
+ */
+
+
+.MMM-PlexNowPlaying {
+	/*height: auto;*/
+}
+
+/**
+ * Font configurations
+ */
+.MMM-PlexNowPlaying .x-small	{ font-size: 15px; line-height: 20px; }
+.MMM-PlexNowPlaying .small	{ font-size: 20px; line-height: 25px; }
+.MMM-PlexNowPlaying .medium	{ font-size: 30px; line-height: 35px; }
+.MMM-PlexNowPlaying .large	{ font-size: 65px; line-height: 65px; }
+.MMM-PlexNowPlaying .x-large	{ font-size: 75px; line-height: 75px; letter-spacing: -3px; }
+
+/**
+ * Loading text
+ */
+.MMM-PlexNowPlaying .loading {
+	color: #666666;
+}
+
+
+.MMM-PlexNowPlaying .secondary-text {
+	font-size: 80%;
+}
+
+.MMM-PlexNowPlaying .posterImg {
+	max-height: 90px;
+	margin-right: 4px;
+}
+
+.MMM-PlexNowPlaying .dataCell {
+	padding: 8px;
+	padding-top: 0;
+	text-align: left;
+	vertical-align: top;
+}
+
+.MMM-PlexNowPlaying .state-icon {
+	margin-right: 5px;
+}
+
+.MMM-PlexNowPlaying .posterImgCell {
+	padding: 0;
+}
+
+/**
+ * User info
+ */
+
+.MMM-PlexNowPlaying .userTable {
+ 	margin-top: 6px;
+ }
+
+.MMM-PlexNowPlaying .userImgCell {
+	vertical-align: middle;
+	height: 30px;
+	width: 35px;
+	padding: 0;
+	padding-right: 5px;
+}
+
+.MMM-PlexNowPlaying .userImg {
+	max-height: 30px;
+	max-width: 30px;
+	border-radius: 15px;
+}
+
+.MMM-PlexNowPlaying .userDataCell {
+	padding: 0;
+	text-align: left;
+	vertical-align: middle;
+	font-size: 80%;
+}
