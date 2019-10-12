@@ -26,6 +26,8 @@ Module.register("MMM-PlexNowPlaying", {
     fontColor: "", // https://www.w3schools.com/cssref/css_colors_legal.asp
     updateInterval: 30, // Seconds, minimum 2
     retryDelay: 5, // Seconds, minimum 0
+    userWhiteList: [],
+    userBlackList: [],
     initialLoadDelay: 0, // Seconds, minimum 0
 		developerMode: true
 	},
@@ -193,7 +195,9 @@ Module.register("MMM-PlexNowPlaying", {
       var xmlItem = plexItems[i];
       var item = {
         user: null,
-        player: null
+        player: null,
+        session: null,
+        transcodeSession: null
       };
       item.type = xmlItem.getAttribute("type");
 
@@ -207,6 +211,9 @@ Module.register("MMM-PlexNowPlaying", {
         item.studio = xmlItem.getAttribute("studio");
         item.originalTitle = xmlItem.getAttribute("originalTitle");
         item.contentRating = xmlItem.getAttribute("contentRating");
+        item.duration = xmlItem.getAttribute("duration");
+        item.viewOffset = xmlItem.getAttribute("viewOffset");
+        item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey");
       } else if ("episode" === item.type) { // Get TV Episode detailes
         item.libraryTitle = xmlItem.getAttribute("librarySectionTitle"); // "TV Shows"
         item.seriesTitle = xmlItem.getAttribute("grandparentTitle");
@@ -220,9 +227,16 @@ Module.register("MMM-PlexNowPlaying", {
         item.title = xmlItem.getAttribute("title");
         item.year = xmlItem.getAttribute("year");
         item.thumbnailImg = xmlItem.getAttribute("thumb");
+        item.duration = xmlItem.getAttribute("duration");
+        item.viewOffset = xmlItem.getAttribute("viewOffset");
+        item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey");
+      } else if ("clip" === item.type) { // Get Live TV Sessions
+        item.title = "Live TV Session";
       } else {
         continue;
       }
+
+      item.endpoint = xmlItem.getAttribute("key");
 
       if (0 < xmlItem.getElementsByTagName("User").length) {
         xmlUser = xmlItem.getElementsByTagName("User")[0];
@@ -244,6 +258,37 @@ Module.register("MMM-PlexNowPlaying", {
         item.player.title = xmlPlayer.getAttribute("title"); // "hoetname.local"
         item.player.version = xmlPlayer.getAttribute("version"); // "1.3.1.916-1cb2c34d"
         item.player.local = xmlPlayer.getAttribute("local"); // "0" | "1"
+      }
+
+      if (0 < xmlItem.getElementsByTagName("Session").length) {
+        xmlSession = xmlItem.getElementsByTagName("Session")[0];
+        item.session = {};
+        item.session.id = xmlPlayer.getAttribute("id"); // "y4v3cia926n1srcz8ncfgqnt"
+        item.session.bandwidth = xmlPlayer.getAttribute("bandwidth"); // "27042"
+        item.session.location = xmlPlayer.getAttribute("location"); // "lan" | "wan"
+      }
+
+      if (0 < xmlItem.getElementsByTagName("TranscodeSession").length) {
+        xmlTranscodeSession = xmlItem.getElementsByTagName("TranscodeSession")[0];
+        item.transcodeSession = {};
+        item.transcodeSession.endpoint = xmlTranscodeSession.getAttribute("key"); // "/transcode/sessions/dh1t4wwpgin6holrnh5b0tsr"
+        item.transcodeSession.throttled = xmlTranscodeSession.getAttribute("throttled"); // "0"
+        item.transcodeSession.complete = xmlTranscodeSession.getAttribute("complete"); // "0"
+        item.transcodeSession.progress = xmlTranscodeSession.getAttribute("progress"); // "-1"
+        item.transcodeSession.speed = xmlTranscodeSession.getAttribute("speed"); // "1.8999999761581421"
+        item.transcodeSession.duration = xmlTranscodeSession.getAttribute("duration"); // "7200000"
+        item.transcodeSession.context = xmlTranscodeSession.getAttribute("context"); // "streaming"
+        item.transcodeSession.sourceVideoCodec = xmlTranscodeSession.getAttribute("sourceVideoCodec"); // "mpeg2video"
+        item.transcodeSession.videoDecision = xmlTranscodeSession.getAttribute("videoDecision"); // "transcode"
+        item.transcodeSession.audioDecision = xmlTranscodeSession.getAttribute("audioDecision"); // "transcode"
+        item.transcodeSession.protocol = xmlTranscodeSession.getAttribute("protocol"); // "dash"
+        item.transcodeSession.container = xmlTranscodeSession.getAttribute("container"); // "mp4"
+        item.transcodeSession.videoCodec = xmlTranscodeSession.getAttribute("videoCodec"); // "h264"
+        item.transcodeSession.audioCodec = xmlTranscodeSession.getAttribute("audioCodec"); // "aac"
+        item.transcodeSession.audioChannels = xmlTranscodeSession.getAttribute("audioChannels"); // "2"
+        item.transcodeSession.transcodeHwRequested = xmlTranscodeSession.getAttribute("transcodeHwRequested"); // "1"
+        item.transcodeSession.maxOffsetAvailable = xmlTranscodeSession.getAttribute("maxOffsetAvailable"); // "4.0040040040040044"
+        item.transcodeSession.minOffsetAvailable = xmlTranscodeSession.getAttribute("minOffsetAvailable"); // "0"
       }
 
       newData.push(item);
@@ -377,6 +422,21 @@ Module.register("MMM-PlexNowPlaying", {
           }
           row.appendChild(dataCell);
 
+        } else if ("clip" === item.type) {
+          var imageCell = document.createElement("td");
+          imageCell.setAttribute("class", "tvImgCell");
+          var icon = document.createElement("span");
+          icon.setAttribute("class", "fa fa-tv");
+          imageCell.appendChild(icon);
+          row.appendChild(imageCell);
+          var dataCell = document.createElement("td");
+          dataCell.setAttribute("class", "dataCell");
+          dataCell.appendChild(stateIcon);
+          dataCell.innerHTML += item.title;
+          if (item.user) {
+            dataCell.append(userTable);
+          }
+          row.appendChild(dataCell);
         }
 
         table.appendChild(row);
