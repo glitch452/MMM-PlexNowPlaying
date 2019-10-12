@@ -361,6 +361,19 @@ Module.register("MMM-PlexNowPlaying", {
           userTable.appendChild(userDataCell);
         }
 
+        var procressRow = null;
+        if (item.duration && item.viewOffset) {
+          procressRow = document.createElement("tr");
+          procressRow.setAttribute("class", "progressBarRow");
+          procressCell = document.createElement("td");
+          procressCell.setAttribute("colspan", 2);
+          var progressBar = document.createElement("div");
+          progressBar.setAttribute("class", "progressBar");
+          progressBar.style.width = String(Math.round(item.viewOffset / item.duration * 100)) + "%"
+          procressCell.appendChild(progressBar);
+          procressRow.appendChild(procressCell);
+        }
+
         var stateIcon = document.createElement("span");
         if (item.player.state) {
           if ("playing" === item.player.state) {
@@ -380,17 +393,20 @@ Module.register("MMM-PlexNowPlaying", {
           secondary.appendChild(stateIcon);
           secondary.innerHTML += "S" + item.seasonNumber + " &bull; E" + item.episodeNumber;
           dataCell.appendChild(secondary);
+          var imageCell = document.createElement("td");
           if (item.seriesPosterImg || item.seasonPosterImg) {
-            var imageCell = document.createElement("td");
             imageCell.setAttribute("class", "posterImgCell");
             var image = document.createElement("img");
             image.setAttribute("src", self.buildURL(item.seriesPosterImg ? item.seriesPosterImg : item.seasonPosterImg));
             image.setAttribute("class", "posterImg");
             imageCell.appendChild(image);
-            row.appendChild(imageCell);
           } else {
-            dataCell.setAttribute("colspan", 2);
+            imageCell.setAttribute("class", "iconImgCell");
+            var icon = document.createElement("span");
+            icon.setAttribute("class", "fa fa-tv");
+            imageCell.appendChild(icon);
           }
+          row.appendChild(imageCell);
           if (item.user) {
             dataCell.append(userTable);
           }
@@ -406,27 +422,31 @@ Module.register("MMM-PlexNowPlaying", {
           secondary.appendChild(stateIcon);
           secondary.innerHTML += item.year;
           dataCell.appendChild(secondary);
+          var imageCell = document.createElement("td");
           if (item.posterImg) {
-            var imageCell = document.createElement("td");
             imageCell.setAttribute("class", "posterImgCell");
             var image = document.createElement("img");
             image.setAttribute("src", self.buildURL(item.posterImg));
             image.setAttribute("class", "posterImg");
             imageCell.appendChild(image);
-            row.appendChild(imageCell);
           } else {
-            dataCell.setAttribute("colspan", 2);
+            imageCell.setAttribute("class", "iconImgCell");
+            var icon = document.createElement("span");
+            icon.setAttribute("class", "fa fa-film");
+            imageCell.appendChild(icon);
           }
+          row.appendChild(imageCell);
           if (item.user) {
             dataCell.append(userTable);
           }
           row.appendChild(dataCell);
 
         } else if ("clip" === item.type) {
+
           var imageCell = document.createElement("td");
-          imageCell.setAttribute("class", "tvImgCell");
+          imageCell.setAttribute("class", "iconImgCell");
           var icon = document.createElement("span");
-          icon.setAttribute("class", "fa fa-tv");
+          icon.setAttribute("class", "fa fa-broadcast-tower");
           imageCell.appendChild(icon);
           row.appendChild(imageCell);
           var dataCell = document.createElement("td");
@@ -437,9 +457,14 @@ Module.register("MMM-PlexNowPlaying", {
             dataCell.append(userTable);
           }
           row.appendChild(dataCell);
+
         }
 
         table.appendChild(row);
+        if (null !== procressRow) {
+          table.appendChild(procressRow);
+        }
+
       }
 
       wrapper.classList.add(self.config.fontSize);

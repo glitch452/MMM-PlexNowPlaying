@@ -6,11 +6,6 @@
  * MIT Licensed.
  */
 
-
-.MMM-PlexNowPlaying {
-	/*height: auto;*/
-}
-
 /**
  * Font configurations
  */
@@ -27,6 +22,13 @@
 	color: #666666;
 }
 
+/**
+ * Content Formatting
+ */
+.MMM-PlexNowPlaying table td {
+	padding: 0;
+	margin: 0;
+}
 
 .MMM-PlexNowPlaying .secondary-text {
 	font-size: 80%;
@@ -34,12 +36,14 @@
 
 .MMM-PlexNowPlaying .posterImg {
 	max-height: 90px;
+	margin: 0;
 	margin-right: 4px;
 }
 
 .MMM-PlexNowPlaying .dataCell {
 	padding: 8px;
-	padding-top: 0;
+	padding-top: 4px;
+	padding-bottom: 0;
 	text-align: left;
 	vertical-align: top;
 }
@@ -51,15 +55,27 @@
 .MMM-PlexNowPlaying .posterImgCell {
 	width: 10px;
 	padding: 0;
+	padding-top: 4px;
 }
 
-.MMM-PlexNowPlaying .tvImgCell {
+.MMM-PlexNowPlaying .iconImgCell {
 	width: 10px;
 	padding: 0;
+	padding-top: 4px;
 	text-align: center;
 	vertical-align: middle;
 	font-size: 40px;
 	color: #555555;
+}
+
+.MMM-PlexNowPlaying .progressBarRow {
+	background-color: #4C0700;
+	margin-botton: 4px;
+}
+
+.MMM-PlexNowPlaying .progressBar {
+	height: 2px;
+	background-color: #e5a00d;
 }
 
 /**
