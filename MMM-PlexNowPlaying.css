@@ -34,48 +34,67 @@
 	font-size: 80%;
 }
 
+.MMM-PlexNowPlaying .posterImgCell {
+	text-align: center;
+	width: 10px;
+	padding: 0;
+	padding-top: 8px;
+}
+
 .MMM-PlexNowPlaying .posterImg {
 	max-height: 90px;
 	margin: 0;
 	margin-right: 4px;
 }
 
-.MMM-PlexNowPlaying .dataCell {
-	padding: 8px;
-	padding-top: 4px;
-	padding-bottom: 0;
-	text-align: left;
-	vertical-align: top;
-}
-
-.MMM-PlexNowPlaying .state-icon {
-	margin-right: 5px;
-}
-
-.MMM-PlexNowPlaying .posterImgCell {
+.MMM-PlexNowPlaying .thumbImgCell {
 	width: 10px;
 	padding: 0;
-	padding-top: 4px;
+	padding-top: 8px;
+}
+
+.MMM-PlexNowPlaying .thumbImg {
+	max-height: 110px;
+	margin: 0;
+	margin-right: 4px;
 }
 
 .MMM-PlexNowPlaying .iconImgCell {
 	width: 10px;
 	padding: 0;
-	padding-top: 4px;
+	padding-top: 8px;
 	text-align: center;
 	vertical-align: middle;
 	font-size: 40px;
 	color: #555555;
 }
 
+.MMM-PlexNowPlaying .dataCell {
+	padding: 8px;
+	padding-bottom: 0;
+	text-align: left;
+	vertical-align: top;
+}
+
+.MMM-PlexNowPlaying .iconCell {
+	width: 10px;
+	font-size: 80%;
+	text-align: center;
+	vertical-align: middle;
+}
+.MMM-PlexNowPlaying .iconCell span {
+	margin-bottom: 8px;
+}
+
 .MMM-PlexNowPlaying .progressBarRow {
 	background-color: #4C0700;
-	margin-botton: 4px;
+	background-color: #432c0e;
 }
 
 .MMM-PlexNowPlaying .progressBar {
 	height: 2px;
 	background-color: #e5a00d;
+	background-color: #cc7b18;
 }
 
 /**

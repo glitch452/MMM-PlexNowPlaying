@@ -184,15 +184,19 @@ Module.register("MMM-PlexNowPlaying", {
   parseData: function(rawXML) {
     var self = this;
 
+    var xmlItems = [];
+    var newData = [];
+
     parser = new DOMParser();
     xmlDoc = parser.parseFromString(rawXML, "text/xml");
     var plexItems = xmlDoc.getElementsByTagName("MediaContainer")[0].getElementsByTagName("Video");
+    var plexAudioItems = xmlDoc.getElementsByTagName("MediaContainer")[0].getElementsByTagName("Track");
+    for (var i = 0; i < plexItems.length; i++) { xmlItems.push(plexItems[i]); }
+    for (var i = 0; i < plexAudioItems.length; i++) { xmlItems.push(plexAudioItems[i]); }
 
-    var newData = [];
+    for (var i = 0; i < xmlItems.length; i++) {
 
-    for (var i = 0; i < plexItems.length; i++) {
-
-      var xmlItem = plexItems[i];
+      var xmlItem = xmlItems[i];
       var item = {
         user: null,
         player: null,
@@ -230,6 +234,23 @@ Module.register("MMM-PlexNowPlaying", {
         item.duration = xmlItem.getAttribute("duration");
         item.viewOffset = xmlItem.getAttribute("viewOffset");
         item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey");
+      } else if ("track" === item.type) { // Get Audio Track Details
+        item.bannerImg = xmlItem.getAttribute("art"); // "/library/metadata/128396/art/1570920387"
+        item.artistBannerImg = xmlItem.getAttribute("grandparentArt"); // "/library/metadata/128396/art/1570920387"
+        item.artistThumbImg = xmlItem.getAttribute("grandparentArt"); // "/library/metadata/128396/thumb/1570920387"
+        item.artistEndpoint = xmlItem.getAttribute("grandparentKey"); // "/library/metadata/128396"
+        item.artistTitle = xmlItem.getAttribute("grandparentTitle"); // "Imagine Dragons"
+        item.trackNumber = xmlItem.getAttribute("index"); // "1"
+        item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey"); // "/library/sections/17"
+        item.libraryTitle = xmlItem.getAttribute("librarySectionTitle"); // "Music"
+        item.albumNumber = xmlItem.getAttribute("parentIndex"); // "1"
+        item.albumEndpoint = xmlItem.getAttribute("parentKey"); // "/library/metadata/128397"
+        item.albumThumbImg = xmlItem.getAttribute("parentThumb"); // "/library/metadata/128397/thumb/1570920398"
+        item.albumTitle = xmlItem.getAttribute("parentTitle"); // "Evolve"
+        item.thumbImage = xmlItem.getAttribute("thumb"); // "/library/metadata/128397/thumb/1570920398"
+        item.title = xmlItem.getAttribute("title"); // "I Don’t Know Why"
+        item.duration = xmlItem.getAttribute("duration");
+        item.viewOffset = xmlItem.getAttribute("viewOffset");
       } else if ("clip" === item.type) { // Get Live TV Sessions
         item.title = "Live TV Session";
       } else {
@@ -255,17 +276,18 @@ Module.register("MMM-PlexNowPlaying", {
         item.player.profile = xmlPlayer.getAttribute("profile"); // "HTML TV App"
         item.player.remotePublicAddress = xmlPlayer.getAttribute("remotePublicAddress"); // "24.246.83.152"
         item.player.state = xmlPlayer.getAttribute("state"); // "playing"
-        item.player.title = xmlPlayer.getAttribute("title"); // "hoetname.local"
+        item.player.title = xmlPlayer.getAttribute("title"); // "hostname.local"
         item.player.version = xmlPlayer.getAttribute("version"); // "1.3.1.916-1cb2c34d"
         item.player.local = xmlPlayer.getAttribute("local"); // "0" | "1"
+        item.player.secure = xmlPlayer.getAttribute("secure"); // "0" | "1"
       }
 
       if (0 < xmlItem.getElementsByTagName("Session").length) {
         xmlSession = xmlItem.getElementsByTagName("Session")[0];
         item.session = {};
-        item.session.id = xmlPlayer.getAttribute("id"); // "y4v3cia926n1srcz8ncfgqnt"
-        item.session.bandwidth = xmlPlayer.getAttribute("bandwidth"); // "27042"
-        item.session.location = xmlPlayer.getAttribute("location"); // "lan" | "wan"
+        item.session.id = xmlSession.getAttribute("id"); // "y4v3cia926n1srcz8ncfgqnt"
+        item.session.bandwidth = xmlSession.getAttribute("bandwidth"); // "27042"
+        item.session.location = xmlSession.getAttribute("location"); // "lan" | "wan"
       }
 
       if (0 < xmlItem.getElementsByTagName("TranscodeSession").length) {
@@ -337,11 +359,10 @@ Module.register("MMM-PlexNowPlaying", {
       wrapper.style.display = "none";
     } else {
 
-      var table = document.createElement("table");
+      var mainTable = document.createElement("table");
+
       for (var i = 0; i < self.plexData.length; i++) {
         var item = self.plexData[i];
-
-        var row = document.createElement("tr");
 
         var userTable = document.createElement("table");
         userTable.setAttribute("class", "userTable");
@@ -366,7 +387,7 @@ Module.register("MMM-PlexNowPlaying", {
           procressRow = document.createElement("tr");
           procressRow.setAttribute("class", "progressBarRow");
           procressCell = document.createElement("td");
-          procressCell.setAttribute("colspan", 2);
+          //procressCell.setAttribute("colspan", 3);
           var progressBar = document.createElement("div");
           progressBar.setAttribute("class", "progressBar");
           progressBar.style.width = String(Math.round(item.viewOffset / item.duration * 100)) + "%"
@@ -374,102 +395,146 @@ Module.register("MMM-PlexNowPlaying", {
           procressRow.appendChild(procressCell);
         }
 
-        var stateIcon = document.createElement("span");
-        if (item.player.state) {
+        var iconCell = document.createElement("td");
+        iconCell.setAttribute("class", "iconCell");
+        var icon;
+        if (null !== item.player) {
+          icon = document.createElement("span");
           if ("playing" === item.player.state) {
-            stateIcon.setAttribute("class", "state-icon far fa-play-circle");
+            icon.setAttribute("class", "far fa-play-circle");
+            iconCell.appendChild(icon);
           } else if ("paused" === item.player.state) {
-            stateIcon.setAttribute("class", "state-icon far fa-pause-circle");
+            icon.setAttribute("class", "far fa-pause-circle");
+            iconCell.appendChild(icon);
           }
         }
-
-        if ("episode" === item.type) {
-
-          var dataCell = document.createElement("td");
-          dataCell.setAttribute("class", "dataCell");
-          dataCell.innerHTML += item.seriesTitle;
-          var secondary = document.createElement("div");
-          secondary.setAttribute("class", "secondary-text");
-          secondary.appendChild(stateIcon);
-          secondary.innerHTML += "S" + item.seasonNumber + " &bull; E" + item.episodeNumber;
-          dataCell.appendChild(secondary);
-          var imageCell = document.createElement("td");
-          if (item.seriesPosterImg || item.seasonPosterImg) {
-            imageCell.setAttribute("class", "posterImgCell");
-            var image = document.createElement("img");
-            image.setAttribute("src", self.buildURL(item.seriesPosterImg ? item.seriesPosterImg : item.seasonPosterImg));
-            image.setAttribute("class", "posterImg");
-            imageCell.appendChild(image);
+        if (null !== item.session) {
+          icon = document.createElement("span");
+          iconCell.appendChild(document.createElement("br"));
+          if ("wan" === item.session.location) {
+            icon.setAttribute("class", "fa fa-globe");
+            iconCell.appendChild(icon);
+          } else if ("lan" === item.session.location) {
+            icon.setAttribute("class", "fa fa-network-wired");
+            iconCell.appendChild(icon);
+          }
+        }
+        if (null !== item.player) {
+          icon = document.createElement("span");
+          iconCell.appendChild(document.createElement("br"));
+          if ("1" === item.player.secure) {
+            icon.setAttribute("class", "fa fa-lock");
           } else {
-            imageCell.setAttribute("class", "iconImgCell");
-            var icon = document.createElement("span");
-            icon.setAttribute("class", "fa fa-tv");
-            imageCell.appendChild(icon);
+            icon.setAttribute("class", "fa fa-lock-open");
           }
-          row.appendChild(imageCell);
-          if (item.user) {
-            dataCell.append(userTable);
-          }
-          row.appendChild(dataCell);
-
-        } else if ("movie" === item.type) {
-
-          var dataCell = document.createElement("td");
-          dataCell.setAttribute("class", "dataCell");
-          dataCell.innerHTML += item.title;
-          var secondary = document.createElement("div");
-          secondary.setAttribute("class", "secondary-text");
-          secondary.appendChild(stateIcon);
-          secondary.innerHTML += item.year;
-          dataCell.appendChild(secondary);
-          var imageCell = document.createElement("td");
-          if (item.posterImg) {
-            imageCell.setAttribute("class", "posterImgCell");
-            var image = document.createElement("img");
-            image.setAttribute("src", self.buildURL(item.posterImg));
-            image.setAttribute("class", "posterImg");
-            imageCell.appendChild(image);
-          } else {
-            imageCell.setAttribute("class", "iconImgCell");
-            var icon = document.createElement("span");
-            icon.setAttribute("class", "fa fa-film");
-            imageCell.appendChild(icon);
-          }
-          row.appendChild(imageCell);
-          if (item.user) {
-            dataCell.append(userTable);
-          }
-          row.appendChild(dataCell);
-
-        } else if ("clip" === item.type) {
-
-          var imageCell = document.createElement("td");
-          imageCell.setAttribute("class", "iconImgCell");
-          var icon = document.createElement("span");
-          icon.setAttribute("class", "fa fa-broadcast-tower");
-          imageCell.appendChild(icon);
-          row.appendChild(imageCell);
-          var dataCell = document.createElement("td");
-          dataCell.setAttribute("class", "dataCell");
-          dataCell.appendChild(stateIcon);
-          dataCell.innerHTML += item.title;
-          if (item.user) {
-            dataCell.append(userTable);
-          }
-          row.appendChild(dataCell);
-
+          iconCell.appendChild(icon);
         }
 
-        table.appendChild(row);
+        var dataCell = document.createElement("td");
+        var imageCell = document.createElement("td");
+        dataCell.setAttribute("class", "dataCell");
+
+        switch (item.type) {
+          case "episode":
+            dataCell.innerHTML += item.seriesTitle;
+            var secondary = document.createElement("div");
+            secondary.setAttribute("class", "secondary-text");
+            secondary.innerHTML += "S" + item.seasonNumber + " &bull; E" + item.episodeNumber;
+            dataCell.appendChild(secondary);
+            if (item.seriesPosterImg || item.seasonPosterImg) {
+              imageCell.setAttribute("class", "posterImgCell");
+              var image = document.createElement("img");
+              image.setAttribute("src", self.buildURL(item.seriesPosterImg ? item.seriesPosterImg : item.seasonPosterImg));
+              image.setAttribute("class", "posterImg");
+              imageCell.appendChild(image);
+            } else {
+              imageCell.setAttribute("class", "iconImgCell");
+              var icon = document.createElement("span");
+              icon.setAttribute("class", "fa fa-tv");
+              imageCell.appendChild(icon);
+            }
+            break;
+          case "movie":
+            dataCell.innerHTML += item.title;
+            var secondary = document.createElement("div");
+            secondary.setAttribute("class", "secondary-text");
+            secondary.innerHTML += item.year;
+            dataCell.appendChild(secondary);
+            if (item.posterImg) {
+              imageCell.setAttribute("class", "posterImgCell");
+              var image = document.createElement("img");
+              image.setAttribute("src", self.buildURL(item.posterImg));
+              image.setAttribute("class", "posterImg");
+              imageCell.appendChild(image);
+            } else {
+              imageCell.setAttribute("class", "iconImgCell");
+              var icon = document.createElement("span");
+              icon.setAttribute("class", "fa fa-film");
+              imageCell.appendChild(icon);
+            }
+            break;
+          case "track":
+            dataCell.innerHTML += item.title;
+            var secondary = document.createElement("div");
+            secondary.setAttribute("class", "secondary-text");
+            secondary.innerHTML += "Artist: " + item.artistTitle + "<br>Album: " + item.albumTitle;
+            dataCell.appendChild(secondary);
+            if (item.albumThumbImg) {
+              imageCell.setAttribute("class", "thumbImgCell");
+              var image = document.createElement("img");
+              image.setAttribute("src", self.buildURL(item.albumThumbImg));
+              image.setAttribute("class", "thumbImg");
+              imageCell.appendChild(image);
+            } else {
+              imageCell.setAttribute("class", "iconImgCell");
+              var icon = document.createElement("span");
+              icon.setAttribute("class", "fa fa-music");
+              imageCell.appendChild(icon);
+            }
+            break;
+          case "clip":
+            imageCell.setAttribute("class", "iconImgCell");
+            var icon = document.createElement("span");
+            icon.setAttribute("class", "fa fa-broadcast-tower");
+            imageCell.appendChild(icon);
+            var dataCell = document.createElement("td");
+            dataCell.setAttribute("class", "dataCell");
+            dataCell.innerHTML += item.title;
+          default:
+            imageCell.setAttribute("class", "iconImgCell");
+            var icon = document.createElement("span");
+            icon.setAttribute("class", "fa fa-play");
+            imageCell.appendChild(icon);
+            var dataCell = document.createElement("td");
+            dataCell.setAttribute("class", "dataCell");
+            dataCell.innerHTML += item.title;
+        }
+
+        if (item.user) {
+          dataCell.append(userTable);
+        }
+
+        var itemContentTable = document.createElement("table");
+        var itemContentTableRow = document.createElement("tr");
+        itemContentTable.appendChild(itemContentTableRow);
+        itemContentTableRow.appendChild(imageCell);
+        itemContentTableRow.appendChild(dataCell);
+        itemContentTableRow.appendChild(iconCell);
+
+        var contentRow = document.createElement("tr");
+        var contentCell = document.createElement("td");
+        contentRow.appendChild(contentCell);
+        contentCell.appendChild(itemContentTable);
+        mainTable.appendChild(contentRow);
         if (null !== procressRow) {
-          table.appendChild(procressRow);
+          mainTable.appendChild(procressRow);
         }
 
       }
 
       wrapper.classList.add(self.config.fontSize);
       if (self.config.fontColor.length > 0) { wrapper.style.color = self.config.fontColor; }
-      wrapper.appendChild(table);
+      wrapper.appendChild(mainTable);
 
     }
 
