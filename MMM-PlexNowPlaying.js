@@ -252,7 +252,16 @@ Module.register("MMM-PlexNowPlaying", {
         item.duration = xmlItem.getAttribute("duration");
         item.viewOffset = xmlItem.getAttribute("viewOffset");
       } else if ("clip" === item.type) { // Get Live TV Sessions
-        item.title = "Live TV Session";
+        item.subtype = xmlItem.getAttribute("subtype"); // "trailer"
+        if (null !== item.subtype && "trailer" == item.subtype) {
+          item.type = "trailer";
+          item.title = xmlItem.getAttribute("title");
+          item.bannerImg = xmlItem.getAttribute("art");
+          item.duration = xmlItem.getAttribute("duration");
+          item.viewOffset = xmlItem.getAttribute("viewOffset");
+        } else {
+          item.title = "Live TV Session";
+        }
       } else {
         continue;
       }
@@ -351,7 +360,7 @@ Module.register("MMM-PlexNowPlaying", {
     if (!self.loaded) {
       wrapper.classList.add("loading");
       wrapper.classList.add("small");
-      wrapper.innerHTML += self.translate("LOADING");
+      wrapper.appendChild(document.createTextNode("LOADING"));
       return wrapper;
     }
 
@@ -387,7 +396,7 @@ Module.register("MMM-PlexNowPlaying", {
           procressRow = document.createElement("tr");
           procressRow.setAttribute("class", "progressBarRow");
           procressCell = document.createElement("td");
-          //procressCell.setAttribute("colspan", 3);
+          procressCell.setAttribute("class", "progressBarCell");
           var progressBar = document.createElement("div");
           progressBar.setAttribute("class", "progressBar");
           progressBar.style.width = String(Math.round(item.viewOffset / item.duration * 100)) + "%"
@@ -436,7 +445,7 @@ Module.register("MMM-PlexNowPlaying", {
 
         switch (item.type) {
           case "episode":
-            dataCell.innerHTML += item.seriesTitle;
+            dataCell.appendChild(document.createTextNode(item.seriesTitle));
             var secondary = document.createElement("div");
             secondary.setAttribute("class", "secondary-text");
             secondary.innerHTML += "S" + item.seasonNumber + " &bull; E" + item.episodeNumber;
@@ -455,10 +464,10 @@ Module.register("MMM-PlexNowPlaying", {
             }
             break;
           case "movie":
-            dataCell.innerHTML += item.title;
+            dataCell.appendChild(document.createTextNode(item.title));
             var secondary = document.createElement("div");
             secondary.setAttribute("class", "secondary-text");
-            secondary.innerHTML += item.year;
+            secondary.appendChild(document.createTextNode(item.year));
             dataCell.appendChild(secondary);
             if (item.posterImg) {
               imageCell.setAttribute("class", "posterImgCell");
@@ -473,12 +482,33 @@ Module.register("MMM-PlexNowPlaying", {
               imageCell.appendChild(icon);
             }
             break;
-          case "track":
-            dataCell.innerHTML += item.title;
+          case "trailer":
+            dataCell.appendChild(document.createTextNode(item.title));
             var secondary = document.createElement("div");
             secondary.setAttribute("class", "secondary-text");
-            secondary.innerHTML += "Artist: " + item.artistTitle + "<br>Album: " + item.albumTitle;
+            secondary.appendChild(document.createTextNode("Trailer"));
             dataCell.appendChild(secondary);
+            imageCell.setAttribute("class", "iconImgCell");
+            var icon = document.createElement("span");
+            icon.setAttribute("class", "fa fa-film");
+            imageCell.appendChild(icon);
+            break;
+          case "track":
+            dataCell.appendChild(document.createTextNode(item.title));
+            var artist = document.createElement("div");
+            artist.setAttribute("class", "secondary-text");
+            icon = document.createElement("span");
+            icon.setAttribute("class", "fa fa-user icon-mr");
+            artist.appendChild(icon);
+            artist.appendChild(document.createTextNode(item.artistTitle));
+            dataCell.appendChild(artist);
+            var album = document.createElement("div");
+            album.setAttribute("class", "secondary-text");
+            icon = document.createElement("span");
+            icon.setAttribute("class", "fa fa-compact-disc icon-mr");
+            album.appendChild(icon);
+            album.appendChild(document.createTextNode(item.albumTitle));
+            dataCell.appendChild(album);
             if (item.albumThumbImg) {
               imageCell.setAttribute("class", "thumbImgCell");
               var image = document.createElement("img");
@@ -499,7 +529,8 @@ Module.register("MMM-PlexNowPlaying", {
             imageCell.appendChild(icon);
             var dataCell = document.createElement("td");
             dataCell.setAttribute("class", "dataCell");
-            dataCell.innerHTML += item.title;
+            dataCell.appendChild(document.createTextNode(item.title));
+            break;
           default:
             imageCell.setAttribute("class", "iconImgCell");
             var icon = document.createElement("span");
@@ -507,7 +538,7 @@ Module.register("MMM-PlexNowPlaying", {
             imageCell.appendChild(icon);
             var dataCell = document.createElement("td");
             dataCell.setAttribute("class", "dataCell");
-            dataCell.innerHTML += item.title;
+            dataCell.appendChild(document.createTextNode(item.title));
         }
 
         if (item.user) {
@@ -530,6 +561,13 @@ Module.register("MMM-PlexNowPlaying", {
           mainTable.appendChild(procressRow);
         }
 
+        var spacerRow = document.createElement("tr");
+        var spacerCell = document.createElement("td");
+        spacerRow.setAttribute("class", "spacerRow");
+        spacerCell.setAttribute("class", "spacerCell");
+        spacerCell.appendChild(document.createElement("div"));
+        spacerRow.appendChild(spacerCell);
+        mainTable.appendChild(spacerRow);
       }
 
       wrapper.classList.add(self.config.fontSize);
