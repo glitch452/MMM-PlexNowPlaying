@@ -29,3 +29,17 @@
   return axis;
 
 }));
+
+/*
+axis.isArray([]); // true
+axis.isArray({}); // false
+axis.isObject({}); // true
+axis.isString(''); // true
+axis.isDate(new Date()); // true
+axis.isRegExp(/test/i); // true
+axis.isFunction(function () {}); // true
+axis.isBoolean(true); // true
+axis.isNumber(1); // true
+axis.isNull(null); // true
+axis.isUndefined(); // true
+*/

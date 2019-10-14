@@ -22,6 +22,17 @@
 	color: #666666;
 }
 
+.MMM-PlexNowPlaying .no-streams-table td {
+	text-align: center;
+	vertical-align: middle;
+}
+.MMM-PlexNowPlaying .no-streams-table span {
+	color: #282828;
+	margin: 0 10px;
+	font-size: 40px;
+}
+
+
 /**
  * Content Formatting
  */
@@ -68,7 +79,7 @@
 }
 
 .MMM-PlexNowPlaying .dataCell {
-	padding: 0 12px 2px 8px;
+	padding: 0 8px 2px 8px;
 	text-align: left;
 	vertical-align: top;
 }
@@ -78,6 +89,7 @@
 	font-size: 80%;
 	text-align: center;
 	vertical-align: middle;
+	padding: 4px;
 }
 .MMM-PlexNowPlaying .iconCell span {
 	margin-bottom: 8px;

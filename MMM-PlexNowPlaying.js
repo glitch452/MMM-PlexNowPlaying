@@ -22,12 +22,16 @@ Module.register("MMM-PlexNowPlaying", {
     serverURL: null,
     serverPort: 32400, // Integer, minimum 0
     xPlexToken: null,
+    showUser: true,
+    showPoster: true,
+    showStatusIcons: true,
     fontSize: "small",
     fontColor: "", // https://www.w3schools.com/cssref/css_colors_legal.asp
     updateInterval: 30, // Seconds, minimum 2
     retryDelay: 5, // Seconds, minimum 0
     userWhiteList: [],
     userBlackList: [],
+    userNameReplace: {},
     initialLoadDelay: 0, // Seconds, minimum 0
 		developerMode: true
 	},
@@ -44,7 +48,7 @@ Module.register("MMM-PlexNowPlaying", {
 	start: function() {
 		var self = this;
 		self.loaded = false;
-    self.plexData = [];
+    self.plexData = null;
     self.apiSessionsEndpoint = "status/sessions/";
     self.updateTimer = null;
 		self.lastUpdateTime = new Date(0);
@@ -74,6 +78,26 @@ Module.register("MMM-PlexNowPlaying", {
 
     if (axis.isNumber(self.config.retryDelay) && !isNaN(self.config.retryDelay) && self.config.retryDelay >= 0) { self.config.retryDelay = self.config.retryDelay * 1000; }
 		else { self.config.retryDelay = self.defaults.retryDelay * 1000; }
+
+    if (!axis.isBoolean(self.config.showUser)) { self.config.showUser = self.defaults.showUser; }
+    if (!axis.isBoolean(self.config.showPoster)) { self.config.showPoster = self.defaults.showPoster; }
+    if (!axis.isBoolean(self.config.showStatusIcons)) { self.config.showStatusIcons = self.defaults.showStatusIcons; }
+
+    // validate arrays of strings
+    var listOfArrays = [ "userWhiteList", "userBlackList" ];
+    listOfArrays.forEach(function(arr) {
+      if (axis.isArray(self.config[arr])) {
+        var temp = [];
+        self.config[arr].forEach(function(str) {
+          if (axis.isString(str)) { temp.push(str); }
+        });
+        self.config[arr] = temp;
+      } else {
+        self.config[arr] = self.default[arr];
+      }
+    });
+
+    //self.config.userNameReplace
 
     self.apixPlexToken = self.config.xPlexToken;
     self.apiBaseURL = self.unTrailingSlashIt(self.config.serverURL);
@@ -322,7 +346,12 @@ Module.register("MMM-PlexNowPlaying", {
         item.transcodeSession.minOffsetAvailable = xmlTranscodeSession.getAttribute("minOffsetAvailable"); // "0"
       }
 
-      newData.push(item);
+      if (!item.user || (!self.config.userBlackList.includes(item.user.title) &&
+          (0 === self.config.userWhiteList.length || self.config.userWhiteList.includes(item.user.title))
+          )) {
+        newData.push(item);
+      }
+
     }
 
     self.plexData = newData;
@@ -357,15 +386,39 @@ Module.register("MMM-PlexNowPlaying", {
 
 		var wrapper = document.createElement("div");
 
-    if (!self.loaded) {
+    if (!self.loaded || null === self.plexData) {
       wrapper.classList.add("loading");
       wrapper.classList.add("small");
-      wrapper.appendChild(document.createTextNode("LOADING"));
+      wrapper.innerHTML = self.translate("LOADING");
       return wrapper;
     }
 
     if (0 === self.plexData.length) {
-      wrapper.style.display = "none";
+
+      var mainTable = document.createElement("table");
+      var row = document.createElement("tr");
+      var cell = document.createElement("td");
+      wrapper.appendChild(mainTable);
+      mainTable.appendChild(row);
+      row.appendChild(cell);
+      mainTable.setAttribute("class", "no-streams-table");
+      var icon = document.createElement("span");
+      icon.setAttribute("class", "fa fa-film");
+      cell.appendChild(icon);
+      icon = document.createElement("span");
+      icon.setAttribute("class", "fa fa-tv");
+      cell.appendChild(icon);
+      icon = document.createElement("span");
+      icon.setAttribute("class", "fa fa-music");
+      cell.appendChild(icon);
+      icon = document.createElement("span");
+      icon.setAttribute("class", "fa fa-broadcast-tower");
+      cell.appendChild(icon);
+      icon = document.createElement("span");
+      icon.setAttribute("class", "fa fa-images");
+      cell.appendChild(icon);
+      return wrapper;
+
     } else {
 
       var mainTable = document.createElement("table");
@@ -375,7 +428,7 @@ Module.register("MMM-PlexNowPlaying", {
 
         var userTable = document.createElement("table");
         userTable.setAttribute("class", "userTable");
-        if (item.user) {
+        if (item.user && self.config.showUser) {
           if (item.user.image) {
             var userImgCell = document.createElement("td");
             userImgCell.setAttribute("class", "userImgCell");
@@ -541,16 +594,16 @@ Module.register("MMM-PlexNowPlaying", {
             dataCell.appendChild(document.createTextNode(item.title));
         }
 
-        if (item.user) {
+        if (item.user && self.config.showUser) {
           dataCell.append(userTable);
         }
 
         var itemContentTable = document.createElement("table");
         var itemContentTableRow = document.createElement("tr");
         itemContentTable.appendChild(itemContentTableRow);
-        itemContentTableRow.appendChild(imageCell);
+        if (self.config.showPoster) { itemContentTableRow.appendChild(imageCell); }
         itemContentTableRow.appendChild(dataCell);
-        itemContentTableRow.appendChild(iconCell);
+        if (self.config.showStatusIcons) { itemContentTableRow.appendChild(iconCell); }
 
         var contentRow = document.createElement("tr");
         var contentCell = document.createElement("td");
@@ -570,11 +623,12 @@ Module.register("MMM-PlexNowPlaying", {
         mainTable.appendChild(spacerRow);
       }
 
-      wrapper.classList.add(self.config.fontSize);
-      if (self.config.fontColor.length > 0) { wrapper.style.color = self.config.fontColor; }
       wrapper.appendChild(mainTable);
 
     }
+
+    wrapper.classList.add(self.config.fontSize);
+    if (self.config.fontColor.length > 0) { wrapper.style.color = self.config.fontColor; }
 
 		return wrapper;
 	},
