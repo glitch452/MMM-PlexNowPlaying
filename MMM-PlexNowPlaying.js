@@ -226,74 +226,85 @@ Module.register("MMM-PlexNowPlaying", {
       };
       item.type = xmlItem.getAttribute("type");
 
-      if ("movie" === item.type) { // Get Movie Details
-        item.libraryTitle = xmlItem.getAttribute("librarySectionTitle"); // "Movies"
-        item.posterImg = xmlItem.getAttribute("thumb");
-        item.bannerImg = xmlItem.getAttribute("art");
-        item.title = xmlItem.getAttribute("title");
-        item.year = xmlItem.getAttribute("year");
-        item.rating = xmlItem.getAttribute("rating");
-        item.studio = xmlItem.getAttribute("studio");
-        item.originalTitle = xmlItem.getAttribute("originalTitle");
-        item.contentRating = xmlItem.getAttribute("contentRating");
-        item.duration = xmlItem.getAttribute("duration");
-        item.viewOffset = xmlItem.getAttribute("viewOffset");
-        item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey");
-      } else if ("episode" === item.type) { // Get TV Episode detailes
-        item.libraryTitle = xmlItem.getAttribute("librarySectionTitle"); // "TV Shows"
-        item.seriesTitle = xmlItem.getAttribute("grandparentTitle");
-        item.seriesBannerImg = xmlItem.getAttribute("grandparentArt");
-        item.seriesPosterImg = xmlItem.getAttribute("grandparentThumb");
-        item.seasonPosterImg = xmlItem.getAttribute("parentThumb");
-        item.seasonTitle = xmlItem.getAttribute("parentTitle");
-        item.seasonNumber = xmlItem.getAttribute("parentIndex");
-        item.episodeNumber = xmlItem.getAttribute("index");
-        item.contentRating = xmlItem.getAttribute("contentRating");
-        item.title = xmlItem.getAttribute("title");
-        item.year = xmlItem.getAttribute("year");
-        item.thumbnailImg = xmlItem.getAttribute("thumb");
-        item.duration = xmlItem.getAttribute("duration");
-        item.viewOffset = xmlItem.getAttribute("viewOffset");
-        item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey");
-      } else if ("track" === item.type) { // Get Audio Track Details
-        item.bannerImg = xmlItem.getAttribute("art"); // "/library/metadata/128396/art/1570920387"
-        item.artistBannerImg = xmlItem.getAttribute("grandparentArt"); // "/library/metadata/128396/art/1570920387"
-        item.artistThumbImg = xmlItem.getAttribute("grandparentArt"); // "/library/metadata/128396/thumb/1570920387"
-        item.artistEndpoint = xmlItem.getAttribute("grandparentKey"); // "/library/metadata/128396"
-        item.artistTitle = xmlItem.getAttribute("grandparentTitle"); // "Imagine Dragons"
-        item.trackNumber = xmlItem.getAttribute("index"); // "1"
-        item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey"); // "/library/sections/17"
-        item.libraryTitle = xmlItem.getAttribute("librarySectionTitle"); // "Music"
-        item.albumNumber = xmlItem.getAttribute("parentIndex"); // "1"
-        item.albumEndpoint = xmlItem.getAttribute("parentKey"); // "/library/metadata/128397"
-        item.albumThumbImg = xmlItem.getAttribute("parentThumb"); // "/library/metadata/128397/thumb/1570920398"
-        item.albumTitle = xmlItem.getAttribute("parentTitle"); // "Evolve"
-        item.thumbImage = xmlItem.getAttribute("thumb"); // "/library/metadata/128397/thumb/1570920398"
-        item.title = xmlItem.getAttribute("title"); // "I Don’t Know Why"
-        item.duration = xmlItem.getAttribute("duration");
-        item.viewOffset = xmlItem.getAttribute("viewOffset");
-      } else if ("photo" === item.type) { // Get Photo Details
-        item.title = xmlItem.getAttribute("title"); // "Ceremony-42"
-        item.thumbImg = xmlItem.getAttribute("thumb"); //"/library/metadata/135467/thumb/1571068069"
-        item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey"); // "/library/sections/18"
-        item.libraryTitle = xmlItem.getAttribute("librarySectionTitle"); // "Photos"
-        item.parentFolderTitle = xmlItem.getAttribute("parentTitle"); // "Ceremony"
-        item.year = xmlItem.getAttribute("year"); // "2017"
-        item.bannerImg = xmlItem.getAttribute("art"); // "/library/metadata/135458/art/1571068088"
-        item.parentFolderBannerImg = xmlItem.getAttribute("parentThumb"); // "/library/metadata/135458/thumb/1571068088"
-      } else if ("clip" === item.type) { // Get Other Video Sessions
-        item.subtype = xmlItem.getAttribute("subtype"); // "trailer"
-        if (null !== item.subtype && "trailer" == item.subtype) { // Get trailer Sessions
-          item.type = "trailer";
-          item.title = xmlItem.getAttribute("title");
+      switch (item.type) {
+        case "movie": // Get Movie Details
+          item.libraryTitle = xmlItem.getAttribute("librarySectionTitle"); // "Movies"
+          item.posterImg = xmlItem.getAttribute("thumb");
           item.bannerImg = xmlItem.getAttribute("art");
+          item.title = xmlItem.getAttribute("title");
+          item.year = xmlItem.getAttribute("year");
+          item.rating = xmlItem.getAttribute("rating");
+          item.studio = xmlItem.getAttribute("studio");
+          item.originalTitle = xmlItem.getAttribute("originalTitle");
+          item.contentRating = xmlItem.getAttribute("contentRating");
           item.duration = xmlItem.getAttribute("duration");
           item.viewOffset = xmlItem.getAttribute("viewOffset");
-        } else { // Get Live TV Sessions
-          item.title = "Live TV Session";
-        }
-      } else {
-        continue;
+          item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey");
+          break;
+        case "episode": // Get TV Episode details
+          item.libraryTitle = xmlItem.getAttribute("librarySectionTitle"); // "TV Shows"
+          item.seriesTitle = xmlItem.getAttribute("grandparentTitle");
+          item.seriesBannerImg = xmlItem.getAttribute("grandparentArt");
+          item.seriesPosterImg = xmlItem.getAttribute("grandparentThumb");
+          item.seasonPosterImg = xmlItem.getAttribute("parentThumb");
+          item.seasonTitle = xmlItem.getAttribute("parentTitle");
+          item.seasonNumber = xmlItem.getAttribute("parentIndex");
+          item.episodeNumber = xmlItem.getAttribute("index");
+          item.contentRating = xmlItem.getAttribute("contentRating");
+          item.title = xmlItem.getAttribute("title");
+          item.year = xmlItem.getAttribute("year");
+          item.thumbnailImg = xmlItem.getAttribute("thumb");
+          item.duration = xmlItem.getAttribute("duration");
+          item.viewOffset = xmlItem.getAttribute("viewOffset");
+          item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey");
+          break;
+        case "track": // Get Audio Track Details
+          item.bannerImg = xmlItem.getAttribute("art"); // "/library/metadata/128396/art/1570920387"
+          item.artistBannerImg = xmlItem.getAttribute("grandparentArt"); // "/library/metadata/128396/art/1570920387"
+          item.artistThumbImg = xmlItem.getAttribute("grandparentArt"); // "/library/metadata/128396/thumb/1570920387"
+          item.artistEndpoint = xmlItem.getAttribute("grandparentKey"); // "/library/metadata/128396"
+          item.artistTitle = xmlItem.getAttribute("grandparentTitle"); // "Imagine Dragons"
+          item.trackNumber = xmlItem.getAttribute("index"); // "1"
+          item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey"); // "/library/sections/17"
+          item.libraryTitle = xmlItem.getAttribute("librarySectionTitle"); // "Music"
+          item.albumNumber = xmlItem.getAttribute("parentIndex"); // "1"
+          item.albumEndpoint = xmlItem.getAttribute("parentKey"); // "/library/metadata/128397"
+          item.albumThumbImg = xmlItem.getAttribute("parentThumb"); // "/library/metadata/128397/thumb/1570920398"
+          item.albumTitle = xmlItem.getAttribute("parentTitle"); // "Evolve"
+          item.thumbImage = xmlItem.getAttribute("thumb"); // "/library/metadata/128397/thumb/1570920398"
+          item.title = xmlItem.getAttribute("title"); // "I Don’t Know Why"
+          item.duration = xmlItem.getAttribute("duration");
+          item.viewOffset = xmlItem.getAttribute("viewOffset");
+          item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey");
+          break;
+        case "photo": // Get Photo Details
+          item.title = xmlItem.getAttribute("title"); // "Ceremony-42"
+          item.thumbImg = xmlItem.getAttribute("thumb"); //"/library/metadata/135467/thumb/1571068069"
+          item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey"); // "/library/sections/18"
+          item.libraryTitle = xmlItem.getAttribute("librarySectionTitle"); // "Photos"
+          item.parentFolderTitle = xmlItem.getAttribute("parentTitle"); // "Ceremony"
+          item.year = xmlItem.getAttribute("year"); // "2017"
+          item.bannerImg = xmlItem.getAttribute("art"); // "/library/metadata/135458/art/1571068088"
+          item.parentFolderBannerImg = xmlItem.getAttribute("parentThumb"); // "/library/metadata/135458/thumb/1571068088"
+          break;
+        case "clip": // Get Other Video Details
+          item.subtype = xmlItem.getAttribute("subtype"); // "trailer"
+          if (null !== item.subtype && "trailer" === item.subtype) { // Get trailer Sessions
+            item.type = "trailer";
+            item.title = xmlItem.getAttribute("title");
+            item.bannerImg = xmlItem.getAttribute("art");
+            item.duration = xmlItem.getAttribute("duration");
+            item.viewOffset = xmlItem.getAttribute("viewOffset");
+          } else if (xmlItem.getAttribute("title").indexOf("Live Session") >= 0) { // Get Live TV Sessions=
+            item.title = "Live TV Session";
+            item.type = "livetv";
+          } else {
+            item.title = xmlItem.getAttribute("title");
+            item.duration = xmlItem.getAttribute("duration");
+            item.viewOffset = xmlItem.getAttribute("viewOffset");
+          }
+          break;
+        default: continue;
       }
 
       item.endpoint = xmlItem.getAttribute("key");
@@ -479,7 +490,9 @@ Module.register("MMM-PlexNowPlaying", {
             dataCell.appendChild(document.createTextNode(item.title));
             var secondary = document.createElement("div");
             secondary.setAttribute("class", "secondary-text");
-            secondary.appendChild(document.createTextNode(item.year));
+            if (null !== item.year) {
+              secondary.appendChild(document.createTextNode(item.year));
+            }
             dataCell.appendChild(secondary);
             if (item.posterImg) {
               imageCell.setAttribute("class", "posterImgCell");
@@ -556,7 +569,7 @@ Module.register("MMM-PlexNowPlaying", {
               imageCell.appendChild(icon);
             }
             break;
-          case "clip":
+          case "livetv":
             imageCell.setAttribute("class", "iconImgCell");
             icon = document.createElement("span");
             icon.setAttribute("class", "fa fa-broadcast-tower");

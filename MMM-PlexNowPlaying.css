@@ -60,6 +60,7 @@
 
 .MMM-PlexNowPlaying .posterImg {
 	max-height: 90px;
+	max-width: 115px;
 	margin: 0;
 	margin-right: 4px;
 }
