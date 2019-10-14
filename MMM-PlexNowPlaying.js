@@ -208,15 +208,12 @@ Module.register("MMM-PlexNowPlaying", {
   parseData: function(rawXML) {
     var self = this;
 
-    var xmlItems = [];
     var newData = [];
 
     parser = new DOMParser();
     xmlDoc = parser.parseFromString(rawXML, "text/xml");
-    var plexItems = xmlDoc.getElementsByTagName("MediaContainer")[0].getElementsByTagName("Video");
-    var plexAudioItems = xmlDoc.getElementsByTagName("MediaContainer")[0].getElementsByTagName("Track");
-    for (var i = 0; i < plexItems.length; i++) { xmlItems.push(plexItems[i]); }
-    for (var i = 0; i < plexAudioItems.length; i++) { xmlItems.push(plexAudioItems[i]); }
+    var mediaContainer = xmlDoc.getElementsByTagName("MediaContainer");
+    var xmlItems = mediaContainer.length > 0 ? mediaContainer[0].children : [];
 
     for (var i = 0; i < xmlItems.length; i++) {
 
@@ -275,15 +272,24 @@ Module.register("MMM-PlexNowPlaying", {
         item.title = xmlItem.getAttribute("title"); // "I Don’t Know Why"
         item.duration = xmlItem.getAttribute("duration");
         item.viewOffset = xmlItem.getAttribute("viewOffset");
-      } else if ("clip" === item.type) { // Get Live TV Sessions
+      } else if ("photo" === item.type) { // Get Photo Details
+        item.title = xmlItem.getAttribute("title"); // "Ceremony-42"
+        item.thumbImg = xmlItem.getAttribute("thumb"); //"/library/metadata/135467/thumb/1571068069"
+        item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey"); // "/library/sections/18"
+        item.libraryTitle = xmlItem.getAttribute("librarySectionTitle"); // "Photos"
+        item.parentFolderTitle = xmlItem.getAttribute("parentTitle"); // "Ceremony"
+        item.year = xmlItem.getAttribute("year"); // "2017"
+        item.bannerImg = xmlItem.getAttribute("art"); // "/library/metadata/135458/art/1571068088"
+        item.parentFolderBannerImg = xmlItem.getAttribute("parentThumb"); // "/library/metadata/135458/thumb/1571068088"
+      } else if ("clip" === item.type) { // Get Other Video Sessions
         item.subtype = xmlItem.getAttribute("subtype"); // "trailer"
-        if (null !== item.subtype && "trailer" == item.subtype) {
+        if (null !== item.subtype && "trailer" == item.subtype) { // Get trailer Sessions
           item.type = "trailer";
           item.title = xmlItem.getAttribute("title");
           item.bannerImg = xmlItem.getAttribute("art");
           item.duration = xmlItem.getAttribute("duration");
           item.viewOffset = xmlItem.getAttribute("viewOffset");
-        } else {
+        } else { // Get Live TV Sessions
           item.title = "Live TV Session";
         }
       } else {
@@ -383,6 +389,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 */
 	getDom: function() {
 		var self = this;
+    var icon;
 
 		var wrapper = document.createElement("div");
 
@@ -402,7 +409,7 @@ Module.register("MMM-PlexNowPlaying", {
       mainTable.appendChild(row);
       row.appendChild(cell);
       mainTable.setAttribute("class", "no-streams-table");
-      var icon = document.createElement("span");
+      icon = document.createElement("span");
       icon.setAttribute("class", "fa fa-film");
       cell.appendChild(icon);
       icon = document.createElement("span");
@@ -444,54 +451,6 @@ Module.register("MMM-PlexNowPlaying", {
           userTable.appendChild(userDataCell);
         }
 
-        var procressRow = null;
-        if (item.duration && item.viewOffset) {
-          procressRow = document.createElement("tr");
-          procressRow.setAttribute("class", "progressBarRow");
-          procressCell = document.createElement("td");
-          procressCell.setAttribute("class", "progressBarCell");
-          var progressBar = document.createElement("div");
-          progressBar.setAttribute("class", "progressBar");
-          progressBar.style.width = String(Math.round(item.viewOffset / item.duration * 100)) + "%"
-          procressCell.appendChild(progressBar);
-          procressRow.appendChild(procressCell);
-        }
-
-        var iconCell = document.createElement("td");
-        iconCell.setAttribute("class", "iconCell");
-        var icon;
-        if (null !== item.player) {
-          icon = document.createElement("span");
-          if ("playing" === item.player.state) {
-            icon.setAttribute("class", "far fa-play-circle");
-            iconCell.appendChild(icon);
-          } else if ("paused" === item.player.state) {
-            icon.setAttribute("class", "far fa-pause-circle");
-            iconCell.appendChild(icon);
-          }
-        }
-        if (null !== item.session) {
-          icon = document.createElement("span");
-          iconCell.appendChild(document.createElement("br"));
-          if ("wan" === item.session.location) {
-            icon.setAttribute("class", "fa fa-globe");
-            iconCell.appendChild(icon);
-          } else if ("lan" === item.session.location) {
-            icon.setAttribute("class", "fa fa-network-wired");
-            iconCell.appendChild(icon);
-          }
-        }
-        if (null !== item.player) {
-          icon = document.createElement("span");
-          iconCell.appendChild(document.createElement("br"));
-          if ("1" === item.player.secure) {
-            icon.setAttribute("class", "fa fa-lock");
-          } else {
-            icon.setAttribute("class", "fa fa-lock-open");
-          }
-          iconCell.appendChild(icon);
-        }
-
         var dataCell = document.createElement("td");
         var imageCell = document.createElement("td");
         dataCell.setAttribute("class", "dataCell");
@@ -511,7 +470,7 @@ Module.register("MMM-PlexNowPlaying", {
               imageCell.appendChild(image);
             } else {
               imageCell.setAttribute("class", "iconImgCell");
-              var icon = document.createElement("span");
+              icon = document.createElement("span");
               icon.setAttribute("class", "fa fa-tv");
               imageCell.appendChild(icon);
             }
@@ -530,7 +489,7 @@ Module.register("MMM-PlexNowPlaying", {
               imageCell.appendChild(image);
             } else {
               imageCell.setAttribute("class", "iconImgCell");
-              var icon = document.createElement("span");
+              icon = document.createElement("span");
               icon.setAttribute("class", "fa fa-film");
               imageCell.appendChild(icon);
             }
@@ -542,7 +501,7 @@ Module.register("MMM-PlexNowPlaying", {
             secondary.appendChild(document.createTextNode("Trailer"));
             dataCell.appendChild(secondary);
             imageCell.setAttribute("class", "iconImgCell");
-            var icon = document.createElement("span");
+            icon = document.createElement("span");
             icon.setAttribute("class", "fa fa-film");
             imageCell.appendChild(icon);
             break;
@@ -570,14 +529,36 @@ Module.register("MMM-PlexNowPlaying", {
               imageCell.appendChild(image);
             } else {
               imageCell.setAttribute("class", "iconImgCell");
-              var icon = document.createElement("span");
+              icon = document.createElement("span");
               icon.setAttribute("class", "fa fa-music");
+              imageCell.appendChild(icon);
+            }
+            break;
+          case "photo":
+            dataCell.appendChild(document.createTextNode(item.title));
+            var folder = document.createElement("div");
+            folder.setAttribute("class", "secondary-text");
+            icon = document.createElement("span");
+            icon.setAttribute("class", "fa fa-folder-open icon-mr");
+            folder.appendChild(icon);
+            folder.appendChild(document.createTextNode(item.parentFolderTitle));
+            dataCell.appendChild(folder);
+            if (item.thumbImg) {
+              imageCell.setAttribute("class", "thumbImgCell");
+              var image = document.createElement("img");
+              image.setAttribute("src", self.buildURL(item.thumbImg));
+              image.setAttribute("class", "thumbImg");
+              imageCell.appendChild(image);
+            } else {
+              imageCell.setAttribute("class", "iconImgCell");
+              icon = document.createElement("span");
+              icon.setAttribute("class", "fa fa-images");
               imageCell.appendChild(icon);
             }
             break;
           case "clip":
             imageCell.setAttribute("class", "iconImgCell");
-            var icon = document.createElement("span");
+            icon = document.createElement("span");
             icon.setAttribute("class", "fa fa-broadcast-tower");
             imageCell.appendChild(icon);
             var dataCell = document.createElement("td");
@@ -586,7 +567,7 @@ Module.register("MMM-PlexNowPlaying", {
             break;
           default:
             imageCell.setAttribute("class", "iconImgCell");
-            var icon = document.createElement("span");
+            icon = document.createElement("span");
             icon.setAttribute("class", "fa fa-play");
             imageCell.appendChild(icon);
             var dataCell = document.createElement("td");
@@ -603,15 +584,43 @@ Module.register("MMM-PlexNowPlaying", {
         itemContentTable.appendChild(itemContentTableRow);
         if (self.config.showPoster) { itemContentTableRow.appendChild(imageCell); }
         itemContentTableRow.appendChild(dataCell);
-        if (self.config.showStatusIcons) { itemContentTableRow.appendChild(iconCell); }
+        if (self.config.showStatusIcons && null !== item.player) {
+          var iconCell = document.createElement("td");
+          iconCell.setAttribute("class", "iconCell");
+          icon = document.createElement("span");
+          icon.setAttribute("class", ("playing" === item.player.state) ? "fa fa-play-circle" : "fa fa-pause-circle");
+          iconCell.appendChild(icon);
+          icon = document.createElement("span");
+          iconCell.appendChild(document.createElement("br"));
+          icon.setAttribute("class", ("1" === item.player.local) ? "fa fa-network-wired" : "fa fa-globe");
+          iconCell.appendChild(icon);
+          icon = document.createElement("span");
+          iconCell.appendChild(document.createElement("br"));
+          icon.setAttribute("class", ("1" === item.player.secure) ? "fa fa-lock" : "fa fa-lock-open");
+          iconCell.appendChild(icon);
+          itemContentTableRow.appendChild(iconCell);
+        }
 
         var contentRow = document.createElement("tr");
         var contentCell = document.createElement("td");
         contentRow.appendChild(contentCell);
         contentCell.appendChild(itemContentTable);
         mainTable.appendChild(contentRow);
-        if (null !== procressRow) {
-          mainTable.appendChild(procressRow);
+
+        var duration = Number(item.duration);
+        var viewOffset = Number(item.viewOffset);
+
+        if (!isNaN(duration) && !isNaN(viewOffset)) {
+          progressRow = document.createElement("tr");
+          progressRow.setAttribute("class", "progressBarRow");
+          procressCell = document.createElement("td");
+          procressCell.setAttribute("class", "progressBarCell");
+          var progressBar = document.createElement("div");
+          progressBar.setAttribute("class", "progressBar");
+          progressBar.style.width = String(Math.round(viewOffset / duration * 100)) + "%"
+          procressCell.appendChild(progressBar);
+          progressRow.appendChild(procressCell);
+          mainTable.appendChild(progressRow);
         }
 
         var spacerRow = document.createElement("tr");
@@ -621,6 +630,7 @@ Module.register("MMM-PlexNowPlaying", {
         spacerCell.appendChild(document.createElement("div"));
         spacerRow.appendChild(spacerCell);
         mainTable.appendChild(spacerRow);
+
       }
 
       wrapper.appendChild(mainTable);

@@ -15,6 +15,13 @@
 .MMM-PlexNowPlaying .large	{ font-size: 65px; line-height: 65px; }
 .MMM-PlexNowPlaying .x-large	{ font-size: 75px; line-height: 75px; letter-spacing: -3px; }
 
+.MMM-PlexNowPlaying table,
+.MMM-PlexNowPlaying tr,
+.MMM-PlexNowPlaying td {
+	height: auto;
+}
+
+
 /**
  * Loading text
  */
@@ -64,6 +71,7 @@
 
 .MMM-PlexNowPlaying .thumbImg {
 	max-height: 115px;
+	max-width: 115px;
 	margin: 0;
 	margin-right: 4px;
 }
@@ -79,7 +87,7 @@
 }
 
 .MMM-PlexNowPlaying .dataCell {
-	padding: 0 8px 2px 8px;
+	padding: 0 12px 2px 8px;
 	text-align: left;
 	vertical-align: top;
 }
