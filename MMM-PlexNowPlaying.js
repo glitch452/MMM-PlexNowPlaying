@@ -41,7 +41,7 @@ Module.register("MMM-PlexNowPlaying", {
     initialLoadDelay: 0, // Seconds, minimum 0
     updateInterval: 30, // Seconds, minimum 2
     retryDelay: 5, // Seconds, minimum 0
-		developerMode: true
+		developerMode: false
 	},
 
 	/**
