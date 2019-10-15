@@ -19,7 +19,8 @@ Module.register("MMM-PlexNowPlaying", {
 	 * The default configuration options
 	 */
 	defaults: {
-    serverURL: null,
+    serverProtocol: "http", // "http" | "https"
+    serverAddress: null,
     serverPort: 32400, // Integer, minimum 0
     xPlexToken: null,
     showUser: true,
@@ -27,8 +28,6 @@ Module.register("MMM-PlexNowPlaying", {
     showStatusIcons: true,
     fontSize: "small", // Options: "x-small" | "small" | "medium" | "large" | "x-large"
     fontColor: "", // https://www.w3schools.com/cssref/css_colors_legal.asp
-    updateInterval: 30, // Seconds, minimum 2
-    retryDelay: 5, // Seconds, minimum 0
     userWhiteList: [], // user title filter
     userBlackList: [],
     typeWhiteList: [], // Type filter: "movie" | "episode" | "track" | "photo" | "trailer" | "livetv" | "other"
@@ -38,7 +37,10 @@ Module.register("MMM-PlexNowPlaying", {
     networkFilter: "both", // "local" | "remote" | "both"
     playStateFilter: "both", // "playing" | "paused" | "both"
     userNameFilter: {},
+    animationSpeed: 0,
     initialLoadDelay: 0, // Seconds, minimum 0
+    updateInterval: 30, // Seconds, minimum 2
+    retryDelay: 5, // Seconds, minimum 0
 		developerMode: true
 	},
 
@@ -62,8 +64,9 @@ Module.register("MMM-PlexNowPlaying", {
 		self.validFontSizes = [ "x-small", "small", "medium", "large", "x-large" ];
     self.validNetworkFilters = [ "local", "remote", "both" ];
     self.validPlayStateFilters = [ "playing", "paused", "both" ];
+    self.validServerProtocols = [ "http", "https" ];
 
-    if (!axis.isString(self.config.serverURL) || 0 === self.config.serverURL.length) {
+    if (!axis.isString(self.config.serverAddress) || 0 === self.config.serverAddress.length) {
       self.log("A server URL is required. ", "error");
       return;
     }
@@ -72,8 +75,9 @@ Module.register("MMM-PlexNowPlaying", {
       return;
     }
 
-    if (axis.isNumber(self.config.serverPort) && !isNaN(self.config.serverPort) && self.config.serverPort >= 0) { self.config.serverPort = Math.floor(self.config.serverPort); }
-		else { self.config.serverPort = self.defaults.serverPort; }
+    if (!self.validServerProtocols.includes(self.config.serverProtocol)) { self.config.serverProtocol = self.defaults.serverProtocol; }
+    if (!axis.isNumber(self.config.serverPort) || isNaN(self.config.serverPort) || self.config.serverPort < 0) { self.config.serverPort = self.defaults.serverPort; }
+    else { self.config.serverPort = Math.floor(self.config.serverPort); }
 
     if (axis.isNumber(self.config.initialLoadDelay) && !isNaN(self.config.initialLoadDelay) && self.config.initialLoadDelay >= 0) { self.config.initialLoadDelay = self.config.initialLoadDelay * 1000; }
 		else { self.config.initialLoadDelay = self.defaults.initialLoadDelay * 1000; }
@@ -87,6 +91,7 @@ Module.register("MMM-PlexNowPlaying", {
     if (!self.validNetworkFilters.includes(self.config.networkFilter)) { self.config.networkFilter = self.defaults.networkFilter; }
     if (!self.validPlayStateFilters.includes(self.config.playStateFilter)) { self.config.playStateFilter = self.defaults.playStateFilter; }
 
+    if (!axis.isNumber(self.config.animationSpeed) || isNaN(self.config.animationSpeed) || self.config.animationSpeed < 0) { self.config.animationSpeed = self.defaults.animationSpeed; }
     if (axis.isNumber(self.config.retryDelay) && !isNaN(self.config.retryDelay) && self.config.retryDelay >= 0) { self.config.retryDelay = self.config.retryDelay * 1000; }
 		else { self.config.retryDelay = self.defaults.retryDelay * 1000; }
 
@@ -122,7 +127,7 @@ Module.register("MMM-PlexNowPlaying", {
     }
 
     self.apixPlexToken = self.config.xPlexToken;
-    self.apiBaseURL = self.unTrailingSlashIt(self.config.serverURL);
+    self.apiBaseURL = self.config.serverProtocol + "://" + self.unTrailingSlashIt(self.config.serverAddress) + ":" + self.config.serverPort;
 
 		self.log(("start(): self.data: " + JSON.stringify(self.data)), "dev");
 		self.log(("start(): self.config: " + JSON.stringify(self.config)), "dev");
@@ -182,7 +187,7 @@ Module.register("MMM-PlexNowPlaying", {
 
     if (attemptNum > self.maxDataAttempts) {
       self.plexData = [];
-      self.updateDom();
+      self.updateDom(self.config.animationSpeed);
       self.log(self.translate("DATA_FAILURE"), "error");
       return;
     }
@@ -195,7 +200,7 @@ Module.register("MMM-PlexNowPlaying", {
           self.log(self.translate("DATA_SUCCESS", { "numberOfAttempts": attemptNum }));
           self.plexData = self.parseData(this.responseText);
           console.log("plexData: " + JSON.stringify(self.plexData), "dev");
-          self.updateDom();
+          self.updateDom(self.config.animationSpeed);
         } else {
           self.log("Error: " + this.status + ": " + this.statusText, "warn");
           self.log(self.translate("DATA_FAILURE_RETRY", { "retryTimeInSeconds": (self.config.retryDelay / 1000) }), "warn");
@@ -219,7 +224,7 @@ Module.register("MMM-PlexNowPlaying", {
     var self = this;
     endpoint = this.trailingSlashIt(endpoint);
     endpoint = this.leadingSlashIt(endpoint);
-    return self.apiBaseURL + ":" + self.config.serverPort + endpoint + "?X-Plex-Token=" + self.apixPlexToken;
+    return self.apiBaseURL + endpoint + "?X-Plex-Token=" + self.apixPlexToken;
   },
 
   /**
