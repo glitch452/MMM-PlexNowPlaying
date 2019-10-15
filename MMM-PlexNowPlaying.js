@@ -25,13 +25,19 @@ Module.register("MMM-PlexNowPlaying", {
     showUser: true,
     showPoster: true,
     showStatusIcons: true,
-    fontSize: "small",
+    fontSize: "small", // Options: "x-small" | "small" | "medium" | "large" | "x-large"
     fontColor: "", // https://www.w3schools.com/cssref/css_colors_legal.asp
     updateInterval: 30, // Seconds, minimum 2
     retryDelay: 5, // Seconds, minimum 0
-    userWhiteList: [],
+    userWhiteList: [], // user title filter
     userBlackList: [],
-    userNameReplace: {},
+    typeWhiteList: [], // Type filter: "movie" | "episode" | "track" | "photo" | "trailer" | "livetv" | "other"
+    typeBlackList: [],
+    libraryWhiteList: [], // Library Name Filter: <library name> | "LiveTV" | "Trailers" | "Other"
+    libraryBlackList: [],
+    networkFilter: "both", // "local" | "remote" | "both"
+    playStateFilter: "both", // "playing" | "paused" | "both"
+    userNameFilter: {},
     initialLoadDelay: 0, // Seconds, minimum 0
 		developerMode: true
 	},
@@ -54,6 +60,8 @@ Module.register("MMM-PlexNowPlaying", {
 		self.lastUpdateTime = new Date(0);
 		self.maxDataAttempts = 3;
 		self.validFontSizes = [ "x-small", "small", "medium", "large", "x-large" ];
+    self.validNetworkFilters = [ "local", "remote", "both" ];
+    self.validPlayStateFilters = [ "playing", "paused", "both" ];
 
     if (!axis.isString(self.config.serverURL) || 0 === self.config.serverURL.length) {
       self.log("A server URL is required. ", "error");
@@ -76,6 +84,9 @@ Module.register("MMM-PlexNowPlaying", {
     if (!self.validFontSizes.includes(self.config.fontSize)) { self.config.fontSize = self.defaults.fontSize; }
     if (!axis.isString(self.config.fontColor)) { self.config.fontColor = self.defaults.fontColor; }
 
+    if (!self.validNetworkFilters.includes(self.config.networkFilter)) { self.config.networkFilter = self.defaults.networkFilter; }
+    if (!self.validPlayStateFilters.includes(self.config.playStateFilter)) { self.config.playStateFilter = self.defaults.playStateFilter; }
+
     if (axis.isNumber(self.config.retryDelay) && !isNaN(self.config.retryDelay) && self.config.retryDelay >= 0) { self.config.retryDelay = self.config.retryDelay * 1000; }
 		else { self.config.retryDelay = self.defaults.retryDelay * 1000; }
 
@@ -84,7 +95,7 @@ Module.register("MMM-PlexNowPlaying", {
     if (!axis.isBoolean(self.config.showStatusIcons)) { self.config.showStatusIcons = self.defaults.showStatusIcons; }
 
     // validate arrays of strings
-    var listOfArrays = [ "userWhiteList", "userBlackList" ];
+    var listOfArrays = [ "userWhiteList", "userBlackList", "typeWhiteList", "typeBlackList", "libraryWhiteList", "libraryBlackList" ];
     listOfArrays.forEach(function(arr) {
       if (axis.isArray(self.config[arr])) {
         var temp = [];
@@ -97,7 +108,18 @@ Module.register("MMM-PlexNowPlaying", {
       }
     });
 
-    //self.config.userNameReplace
+    if (axis.isObject(self.config.userNameFilter)) {
+      var temp = {};
+      for (var key in self.config.userNameFilter) {
+        if (!self.config.userNameFilter.hasOwnProperty(key)) { continue; }
+        if (axis.isString(self.config.userNameFilter[key])) {
+          temp[key] = self.config.userNameFilter[key];
+        }
+      }
+      self.config.userNameFilter = temp;
+    } else {
+      self.config.userNameFilter = self.defaults.userNameFilter;
+    }
 
     self.apixPlexToken = self.config.xPlexToken;
     self.apiBaseURL = self.unTrailingSlashIt(self.config.serverURL);
@@ -171,7 +193,8 @@ Module.register("MMM-PlexNowPlaying", {
       if (this.readyState == 4) {
         if (this.status == 200) {
           self.log(self.translate("DATA_SUCCESS", { "numberOfAttempts": attemptNum }));
-          self.parseData(this.responseText);
+          self.plexData = self.parseData(this.responseText);
+          console.log("plexData: " + JSON.stringify(self.plexData), "dev");
           self.updateDom();
         } else {
           self.log("Error: " + this.status + ": " + this.statusText, "warn");
@@ -197,6 +220,15 @@ Module.register("MMM-PlexNowPlaying", {
     endpoint = this.trailingSlashIt(endpoint);
     endpoint = this.leadingSlashIt(endpoint);
     return self.apiBaseURL + ":" + self.config.serverPort + endpoint + "?X-Plex-Token=" + self.apixPlexToken;
+  },
+
+  /**
+   * The replaceUserName replaces a username with the one provided in the self.config.userNameFilter object
+   * @param (string) the username to be replaced
+   * @reutrn The substitute name
+   */
+  replaceUserName: function(username) {
+    return this.config.userNameFilter[username] ? this.config.userNameFilter[username] : username;
   },
 
   /**
@@ -295,13 +327,17 @@ Module.register("MMM-PlexNowPlaying", {
             item.bannerImg = xmlItem.getAttribute("art");
             item.duration = xmlItem.getAttribute("duration");
             item.viewOffset = xmlItem.getAttribute("viewOffset");
+            item.libraryTitle = "Trailers";
           } else if (xmlItem.getAttribute("title").indexOf("Live Session") >= 0) { // Get Live TV Sessions=
             item.title = "Live TV Session";
             item.type = "livetv";
+            item.libraryTitle = "LiveTV";
           } else {
+            item.type = "other";
             item.title = xmlItem.getAttribute("title");
             item.duration = xmlItem.getAttribute("duration");
             item.viewOffset = xmlItem.getAttribute("viewOffset");
+            item.libraryTitle = "Other";
           }
           break;
         default: continue;
@@ -315,6 +351,7 @@ Module.register("MMM-PlexNowPlaying", {
         item.user.id = xmlUser.getAttribute("id");
         item.user.image = xmlUser.getAttribute("thumb");
         item.user.title = xmlUser.getAttribute("title");
+        item.user.name = self.replaceUserName(item.user.title);
       }
 
       if (0 < xmlItem.getElementsByTagName("Player").length) {
@@ -363,16 +400,24 @@ Module.register("MMM-PlexNowPlaying", {
         item.transcodeSession.minOffsetAvailable = xmlTranscodeSession.getAttribute("minOffsetAvailable"); // "0"
       }
 
-      if (!item.user || (!self.config.userBlackList.includes(item.user.title) &&
-          (0 === self.config.userWhiteList.length || self.config.userWhiteList.includes(item.user.title))
-          )) {
+      var userListCheck = (!item.user || (!self.config.userBlackList.includes(item.user.title) &&
+          (0 === self.config.userWhiteList.length || self.config.userWhiteList.includes(item.user.title)) ) );
+      var typeListCheck = (!self.config.typeBlackList.includes(item.type) &&
+          (0 === self.config.typeWhiteList.length || self.config.typeWhiteList.includes(item.type)) );
+      var libraryListCheck = (!self.config.libraryBlackList.includes(item.libraryTitle) &&
+          (0 === self.config.libraryWhiteList.length || self.config.libraryWhiteList.includes(item.libraryTitle)) );
+      var networkFilterCheck = ("both" === self.config.networkFilter || (
+          ("1" === item.player.local && "local" === self.config.networkFilter) ||
+          ("0" === item.player.local && "remote" === self.config.networkFilter)));
+      var playStateFilterCheck = ("both" === self.config.playStateFilter || item.player.state === self.config.playStateFilter);
+
+      if (userListCheck && typeListCheck && libraryListCheck && networkFilterCheck && playStateFilterCheck) {
         newData.push(item);
       }
 
     }
 
-    self.plexData = newData;
-    console.log("plexData: " + JSON.stringify(self.plexData), "dev");
+    return newData;
   },
 
 	/**
@@ -458,7 +503,7 @@ Module.register("MMM-PlexNowPlaying", {
           }
           var userDataCell = document.createElement("td");
           userDataCell.setAttribute("class", "userDataCell");
-          userDataCell.innerHTML = item.user.title;
+          userDataCell.innerHTML = item.user.name;
           userTable.appendChild(userDataCell);
         }
 
