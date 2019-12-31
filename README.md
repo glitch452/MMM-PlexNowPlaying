@@ -6,10 +6,10 @@ This module displays the list of playback sessions for a [Plex Media Server](htt
 
 | Status  | Version | Date       | Maintained? | Minimum MagicMirror² Version |
 |:------- |:------- |:---------- |:----------- |:---------------------------- |
-| Working | `1.0.0` | 2019-10-14 | Yes         |`2.2.1`                       |
+| Working | `1.1.0` | 2019-12-31 | Yes         |`2.2.1`                       |
 
 ### Example
-![Example of MMM-LocalTemperature](images/sample.png?raw=true "Example screenshot")
+![Example of MMM-PlexNowPlaying](images/sample.png?raw=true "Example screenshot")
 
 ### Dependencies
 1. A [Plex Media Server](https://plex.tv) installation for the source of the data
@@ -61,6 +61,8 @@ var config = {
 | `showUser`              | *Optional* - When `true`, the user avatar and username are shown for each item in the list.<br>**Type:** `boolean`<br>**Default:** `true`
 | `showPoster`            | *Optional* - When `true`, the thubmail image is show for each item in the list with a supported image.<br>**Type:** `boolean`<br>**Default:** `true`
 | `showStatusIcons`       | *Optional* - When `true`, the status indicator icons are shown in the list. These icons include the playback state (playing/paused), connection type (local/remote) and connection security status (secure/insecure).<br>**Type:** `boolean`<br>**Default:** `true`
+| `showPlayCountInHeader` | *Optional* - When `true`, the number of streams will be displayed after the header title.  Note: If no header is provided in the module configuration, this has no effect since no header will be shown.<br>**Type:** `boolean`<br>**Default:** `true`
+| `hideWhenNothingPlaying`| *Optional* - When `true`, this module will be completely hidden when there are no streams.<br>**Type:** `boolean`<br>**Default:** `false`
 | `networkFilter`         | *Optional* - Whether to show only Local streams, only Remote streams of Both. <br>**Type:** `string`<br>**Default:** `'both'`<br>**Options:** `'local'`, `'remote'`, `'both'`
 | `playStateFilter`       | *Optional* - Whether to show only Playing streams, only Paused streams of Both. <br>**Type:** `string`<br>**Default:** `'both'`<br>**Options:** `'playing'`, `'paused'`, `'both'`
 | `userWhiteList`         | *Optional* - When set, items will only show up if the user is in this list.<br>**Type:** `array` of `string`<br>**Default:** `[]`
@@ -75,7 +77,7 @@ var config = {
 
 ## Updates
 To update the module to the latest version, use your terminal to:
-1. Navigate to your MMM-LocalTemperature folder. If you are using the default installation directory, use the command:<br>`cd ~/MagicMirror/modules/MMM-LocalTemperature`
+1. Navigate to your MMM-PlexNowPlaying folder. If you are using the default installation directory, use the command:<br>`cd ~/MagicMirror/modules/MMM-PlexNowPlaying`
 2. Update the module by executing the following command:<br>`git pull`
 
 If you have changed the module on your own, the update will fail. <br>To force an update (WARNING! your changes will be lost), reset the module and then update with the following commands:
@@ -87,14 +89,14 @@ git pull
 ## Manually Choose a Version
 
 To use an older version of this module, use your terminal to:
-1. Navigate to your MMM-LocalTemperature folder. If you are using the default installation directory, use the command:<br>`cd ~/MagicMirror/modules/MMM-LocalTemperature`
+1. Navigate to your MMM-PlexNowPlaying folder. If you are using the default installation directory, use the command:<br>`cd ~/MagicMirror/modules/MMM-PlexNowPlaying`
 2. Fetch all the available tags<br>`git fetch`
 3. Show all the available tags<br>`git tag`
 4. Checkout one of the available tags<br>`git checkout {tag_name}`<br>Example: `git checkout v1.0.0`
 
 
 To switch back to the latest version, use your terminal to:
-1. Navigate to your MMM-LocalTemperature folder. If you are using the default installation directory, use the command:<br>`cd ~/MagicMirror/modules/MMM-LocalTemperature`
+1. Navigate to your MMM-PlexNowPlaying folder. If you are using the default installation directory, use the command:<br>`cd ~/MagicMirror/modules/MMM-PlexNowPlaying`
 2. Checkout the master branch<br>`git checkout master`
 
 ## License
