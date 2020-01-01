@@ -28,6 +28,7 @@ Module.register("MMM-PlexNowPlaying", {
 		showStatusIcons: true,
 		showPlayCountInHeader: true,
 		hideWhenNothingPlaying: false,
+		enableProgressTimer: true,
 		fontSize: "small", // Options: "x-small" | "small" | "medium" | "large" | "x-large"
 		fontColor: "", // https://www.w3schools.com/cssref/css_colors_legal.asp
 		userWhiteList: [], // user title filter
@@ -62,6 +63,8 @@ Module.register("MMM-PlexNowPlaying", {
 		self.plexData = null;
 		self.apiSessionsEndpoint = "status/sessions/";
 		self.updateTimer = null;
+		self.positionTimer = null;
+		self.progressTimer = null;
 		self.lastUpdateTime = new Date(0);
 		self.maxDataAttempts = 3;
 		self.validFontSizes = [ "x-small", "small", "medium", "large", "x-large" ];
@@ -109,6 +112,7 @@ Module.register("MMM-PlexNowPlaying", {
 		if (!axis.isBoolean(self.config.showStatusIcons)) { self.config.showStatusIcons = self.defaults.showStatusIcons; }
 		if (!axis.isBoolean(self.config.showPlayCountInHeader)) { self.config.showPlayCountInHeader = self.defaults.showPlayCountInHeader; }
 		if (!axis.isBoolean(self.config.hideWhenNothingPlaying)) { self.config.hideWhenNothingPlaying = self.defaults.hideWhenNothingPlaying; }
+		if (!axis.isBoolean(self.config.enableProgressTimer)) { self.config.enableProgressTimer = self.defaults.enableProgressTimer; }
 
 		// validate arrays of strings
 		var listOfArrays = [ "userWhiteList", "userBlackList", "typeWhiteList", "typeBlackList", "libraryWhiteList", "libraryBlackList" ];
@@ -498,6 +502,9 @@ Module.register("MMM-PlexNowPlaying", {
 			return wrapper;
 		}
 
+		// Clear the timer for the progress tick
+		clearInterval(self.progressTimer);
+
 		if (0 === self.plexData.length) {
 
 			if (self.config.hideWhenNothingPlaying) {
@@ -732,7 +739,11 @@ Module.register("MMM-PlexNowPlaying", {
 					procressCell.setAttribute("class", "progressBarCell");
 					var progressBar = document.createElement("div");
 					progressBar.setAttribute("class", "progressBar");
-					progressBar.style.width = String(Math.round(viewOffset / duration * 100)) + "%"
+					progressBar.style.width = String(Math.round(viewOffset / duration * 10000) / 100) + "%";
+					progressBar.style.transition = "width 1.5s";
+					progressBar.setAttribute('data-state', item.player.state);
+					progressBar.setAttribute('data-duration', duration);
+					progressBar.setAttribute('data-viewOffset', viewOffset + 1000);
 					procressCell.appendChild(progressBar);
 					progressRow.appendChild(procressCell);
 					mainTable.appendChild(progressRow);
@@ -762,7 +773,31 @@ Module.register("MMM-PlexNowPlaying", {
 			self.moduleWrapper.style.position = "static";
 			self.moduleWrapper.style.opacity = 1;
 		}
+
+		if (self.config.enableProgressTimer) {
+			// Set the interval timer for the progress tick
+			self.progressTimer = setInterval(function(){ self.progressTick(); }, 1000);
+		}
+
 		return wrapper;
+	},
+
+	/**
+	 * The progressTick function adds one second to the progress bars to sho wprogress between updates from the server
+	 */
+	progressTick: function() {
+		var self = this;
+		var progressBars = self.moduleWrapper.getElementsByClassName('progressBar');
+		//self.log("progressBars: " + typeof(progressBars) + " size: " + progressBars.length, "dev");
+		for (var i = 0; i < progressBars.length; i++) {
+			var progressBar = progressBars[i];
+			if ("playing" === progressBar.getAttribute("data-state")) {
+				var duration = Number(progressBar.getAttribute("data-duration"));
+				var viewOffset = Math.min(duration, Number(progressBar.getAttribute("data-viewOffset")) + 1000);
+				progressBar.setAttribute('data-viewOffset', viewOffset);
+				progressBar.style.width = String(Math.round(viewOffset / duration * 10000) / 100) + "%";
+			}
+		}
 	},
 
 	/**
