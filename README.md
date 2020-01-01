@@ -37,7 +37,6 @@ var config = {
                 serverAddress: "x.x.x.x",
                 serverPort: 32400,
                 xPlexToken: "xxxxxxxxxxxxxxxxxxxx"
-                ...
                 // See below for more Configuration Options
             }
         },
@@ -55,17 +54,18 @@ var config = {
 | `serverPort`            | *Optional* - The port to use when connecting to the server.<br>**Type:** `number`<br>**Default:** `32400`
 | `serverProtocol`        | *Optional* - The protocol to use when connecting to the server. Note: https will work with newer Plex Server versions, however MagicMirror may not be able to connect via https. <br>**Type:** `string`<br>**Default:** `"http"`<br>**Options:** `"http"`, `"https"`
 | `updateInterval`        | *Optional* - The number of seconds to wait before requesting an update of the data from the Plex Server. The minimum value is `2`. <br>**Type:** `number`<br>**Default:** `30`
-| `fontSize`              | *Optional* - The main font size to use for the module text. <br>**Type:** `string`<br>**Default:** `'medium'`<br>**Options:** `'x-small'`, `'small'`, `'medium'`, `'large'`, `'x-large'`
+| `fontSize`              | *Optional* - The main font size to use for the module text. <br>**Type:** `string`<br>**Default:** `"medium"`<br>**Options:** `"x-small"`, `"small"`, `"medium"`, `"large"`, `"x-large"`
 | `fontColor`             | *Optional* - The colour to use for the module text. <br>**Type:** `string`<br>**Default:** MagicMirror's default color<br>**Options:** Any valid CSS color value.  See [w3schools](https://www.w3schools.com/cssref/css_colors_legal.asp) for more info.
 | `userNameFilter`        | *Optional* - Replace usernames with custom names.  i.e. if someone uses the username `plex.user.123`, the module can display their actual name instead by adding an entry into this object that maps the user name to the friendly name.<br>**Example:** `{ "user_name": "Custom Name", "plex.user.123": "John Smith" }`<br>**Type:** `object`<br>**Default:** `{}`
 | `showUser`              | *Optional* - When `true`, the user avatar and username are shown for each item in the list.<br>**Type:** `boolean`<br>**Default:** `true`
 | `showPoster`            | *Optional* - When `true`, the thubmail image is show for each item in the list with a supported image.<br>**Type:** `boolean`<br>**Default:** `true`
 | `showStatusIcons`       | *Optional* - When `true`, the status indicator icons are shown in the list. These icons include the playback state (playing/paused), connection type (local/remote) and connection security status (secure/insecure).<br>**Type:** `boolean`<br>**Default:** `true`
-| `showPlayCountInHeader` | *Optional* - When `true`, the number of streams will be displayed after the header title.  Note: If no header is provided in the module configuration, this has no effect since no header will be shown.<br>**Type:** `boolean`<br>**Default:** `true`
+| `headerTemplate`        | *Optional* - The text template to use for the module header text when there is at least one stream displayed. The sting `"{header_text}"` will be replaced with the module's header text. The string `"{play_count}"` will be replaced with the number of streams displayed. <br>**Type:** `string`<br>**Default:** `"{header_text} ({play_count})"`
+| `headerTemplateZero`    | *Optional* - The text template to use for the module header text when there are no streams displayed. The sting `"{header_text}"` will be replaced with the module's header text. The string `"{play_count}"` will be replaced with the number of streams displayed. <br>**Type:** `string`<br>**Default:** `"{header_text} ({play_count})"`
 | `hideWhenNothingPlaying`| *Optional* - When `true`, this module will be completely hidden when there are no streams.<br>**Type:** `boolean`<br>**Default:** `false`
 | `enableProgressTimer`   | *Optional* - When `true`, the progress bars will be incremented between data updates from the server.  This makes the progress bar animation smoother with smaller jumps, which is especially noticeable with shorter media files, such as music.<br>**Type:** `boolean`<br>**Default:** `true`
-| `networkFilter`         | *Optional* - Whether to show only Local streams, only Remote streams of Both. <br>**Type:** `string`<br>**Default:** `'both'`<br>**Options:** `'local'`, `'remote'`, `'both'`
-| `playStateFilter`       | *Optional* - Whether to show only Playing streams, only Paused streams of Both. <br>**Type:** `string`<br>**Default:** `'both'`<br>**Options:** `'playing'`, `'paused'`, `'both'`
+| `networkFilter`         | *Optional* - Whether to show only Local streams, only Remote streams of Both. <br>**Type:** `string`<br>**Default:** `"both"`<br>**Options:** `"local"`, `"remote"`, `"both"`
+| `playStateFilter`       | *Optional* - Whether to show only Playing streams, only Paused streams of Both. <br>**Type:** `string`<br>**Default:** `"both"`<br>**Options:** `"playing"`, `"paused"`, `"both"`
 | `userWhiteList`         | *Optional* - When set, items will only show up if the user is in this list.<br>**Type:** `array` of `string`<br>**Default:** `[]`
 | `userBlackList`         | *Optional* - Items will NOT show up if the user is in this list.  This has a higher priority than `userWhiteList`. <br>**Type:** `array` of `string`<br>**Default:** `[]`
 | `typeWhiteList`         | *Optional* - When set, items will only show up if the type is in this list.<br>**Item Types**: `"movie"`, `"episode"`, `"track"`, `"photo"`, `"trailer"`, `"livetv"`, `"other"`.<br>**Type:** `array` of `string`<br>**Default:** `[]`

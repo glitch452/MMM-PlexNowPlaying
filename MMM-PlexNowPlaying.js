@@ -26,7 +26,8 @@ Module.register("MMM-PlexNowPlaying", {
 		showUser: true,
 		showPoster: true,
 		showStatusIcons: true,
-		showPlayCountInHeader: true,
+		headerTemplate: "{header_text} ({play_count})",
+		headerTemplateZero: "{header_text}",
 		hideWhenNothingPlaying: false,
 		enableProgressTimer: true,
 		fontSize: "small", // Options: "x-small" | "small" | "medium" | "large" | "x-large"
@@ -80,6 +81,13 @@ Module.register("MMM-PlexNowPlaying", {
 			self.log("An X-Plex-Token is required. ", "error");
 			return;
 		}
+		
+		if (!axis.isString(self.config.headerTemplate) || 0 === self.config.headerTemplate.length) {
+			self.config.headerTemplate = self.defaults.headerTemplate;
+		}
+		if (!axis.isString(self.config.headerTemplateZero) || 0 === self.config.headerTemplateZero.length) {
+			self.config.headerTemplateZero = self.defaults.headerTemplateZero;
+		}
 
 		if (!self.validServerProtocols.includes(self.config.serverProtocol)) { self.config.serverProtocol = self.defaults.serverProtocol; }
 		if (!axis.isNumber(self.config.serverPort) || isNaN(self.config.serverPort) || self.config.serverPort < 0) {
@@ -110,7 +118,6 @@ Module.register("MMM-PlexNowPlaying", {
 		if (!axis.isBoolean(self.config.showUser)) { self.config.showUser = self.defaults.showUser; }
 		if (!axis.isBoolean(self.config.showPoster)) { self.config.showPoster = self.defaults.showPoster; }
 		if (!axis.isBoolean(self.config.showStatusIcons)) { self.config.showStatusIcons = self.defaults.showStatusIcons; }
-		if (!axis.isBoolean(self.config.showPlayCountInHeader)) { self.config.showPlayCountInHeader = self.defaults.showPlayCountInHeader; }
 		if (!axis.isBoolean(self.config.hideWhenNothingPlaying)) { self.config.hideWhenNothingPlaying = self.defaults.hideWhenNothingPlaying; }
 		if (!axis.isBoolean(self.config.enableProgressTimer)) { self.config.enableProgressTimer = self.defaults.enableProgressTimer; }
 
@@ -463,12 +470,12 @@ Module.register("MMM-PlexNowPlaying", {
 
 		} else { // If the notification is coming from the MagicMirror system
 			switch (notification) {
-				//case 'ALL_MODULES_STARTED': break;
-				case 'MODULE_DOM_CREATED':
+				//case "ALL_MODULES_STARTED": break;
+				case "MODULE_DOM_CREATED":
 					// Save a reference to the dom wrapper after it is created
 					self.moduleWrapper = document.getElementById(self.identifier);
 					break;
-				//case 'DOM_OBJECTS_CREATED': break;
+				//case "DOM_OBJECTS_CREATED": break;
 			}
 		}
 	},
@@ -478,12 +485,11 @@ Module.register("MMM-PlexNowPlaying", {
 	 */
 	getHeader: function() {
 		var self = this;
-		if (self.config.showPlayCountInHeader) {
-			let count = null === self.plexData ? 0 : self.plexData.length;
-			return self.data.header + ' (' + count + ')';
-		} else {
-			return self.data.header;
-		}
+		let count = (!self.loaded || null === self.plexData) ? 0 : self.plexData.length;
+		var template = 0 === count ? self.config.headerTemplateZero : self.config.headerTemplate;
+		template = self.replaceAll(template, "{header_text}", self.data.header);
+		template = self.replaceAll(template, "{play_count}", count);
+		return template;
 	},
 
 	/**
@@ -741,9 +747,9 @@ Module.register("MMM-PlexNowPlaying", {
 					progressBar.setAttribute("class", "progressBar");
 					progressBar.style.width = String(Math.round(viewOffset / duration * 10000) / 100) + "%";
 					progressBar.style.transition = "width 1.5s";
-					progressBar.setAttribute('data-state', item.player.state);
-					progressBar.setAttribute('data-duration', duration);
-					progressBar.setAttribute('data-viewOffset', viewOffset + 1000);
+					progressBar.setAttribute("data-state", item.player.state);
+					progressBar.setAttribute("data-duration", duration);
+					progressBar.setAttribute("data-viewOffset", viewOffset + 1000);
 					procressCell.appendChild(progressBar);
 					progressRow.appendChild(procressCell);
 					mainTable.appendChild(progressRow);
@@ -787,17 +793,37 @@ Module.register("MMM-PlexNowPlaying", {
 	 */
 	progressTick: function() {
 		var self = this;
-		var progressBars = self.moduleWrapper.getElementsByClassName('progressBar');
+		var progressBars = self.moduleWrapper.getElementsByClassName("progressBar");
 		//self.log("progressBars: " + typeof(progressBars) + " size: " + progressBars.length, "dev");
 		for (var i = 0; i < progressBars.length; i++) {
 			var progressBar = progressBars[i];
 			if ("playing" === progressBar.getAttribute("data-state")) {
 				var duration = Number(progressBar.getAttribute("data-duration"));
 				var viewOffset = Math.min(duration, Number(progressBar.getAttribute("data-viewOffset")) + 1000);
-				progressBar.setAttribute('data-viewOffset', viewOffset);
+				progressBar.setAttribute("data-viewOffset", viewOffset);
 				progressBar.style.width = String(Math.round(viewOffset / duration * 10000) / 100) + "%";
 			}
 		}
+	},
+
+	/**
+	 * The replaceAll function replaces all occurrences of a string within the given string.
+	 *
+	 * @param str (string) The string to search within
+	 * @param find (string) The string to find within str
+	 * @param replace (string) The string to use as a replacement for the find string
+	 * @return (string) A copy of str with all the find occurrences replaced with replace
+	 */
+	replaceAll: function(str, find, replace) {
+		var output = "";
+		var idx = str.indexOf(find);
+		while (idx >= 0) {
+			output += str.substr(0, idx) + replace;
+			str = str.substring(idx + find.length);
+			idx = str.indexOf(find);
+		}
+		output += str;
+		return output;
 	},
 
 	/**
