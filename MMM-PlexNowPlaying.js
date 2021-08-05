@@ -589,7 +589,16 @@ Module.register("MMM-PlexNowPlaying", {
 						dataCell.appendChild(document.createTextNode(item.seriesTitle));
 						secondary = document.createElement("div");
 						secondary.setAttribute("class", "secondary-text");
-						secondary.innerHTML += "S" + item.seasonNumber + " &bull; E" + item.episodeNumber;
+						if (item.seasonNumber) {
+							secondary.innerHTML += "S" + item.seasonNumber;
+						}
+						if (item.episodeNumber) {
+							if (item.seasonNumber) {
+								secondary.innerHTML += " &bull; ";
+							}
+							secondary.innerHTML += "E" + item.episodeNumber;
+						}
+						
 						dataCell.appendChild(secondary);
 						if (item.seriesPosterImg || item.seasonPosterImg) {
 							imageCell.setAttribute("class", "posterImgCell");
