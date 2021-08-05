@@ -6,7 +6,7 @@ This module displays the list of playback sessions for a [Plex Media Server](htt
 
 | Status  | Version | Date       | Maintained? | Minimum MagicMirror² Version |
 |:------- |:------- |:---------- |:----------- |:---------------------------- |
-| Working | `1.1.0` | 2019-12-31 | Yes         |`2.2.1`                       |
+| Working | `1.2.0` | 2021-08-05 | Yes         |`2.2.1`                       |
 
 ### Example
 ![Example of MMM-PlexNowPlaying](images/sample.png?raw=true "Example screenshot")
@@ -61,7 +61,7 @@ var config = {
 | `showPoster`            | *Optional* - When `true`, the thubmail image is show for each item in the list with a supported image.<br>**Type:** `boolean`<br>**Default:** `true`
 | `showStatusIcons`       | *Optional* - When `true`, the status indicator icons are shown in the list. These icons include the playback state (playing/paused), connection type (local/remote) and connection security status (secure/insecure).<br>**Type:** `boolean`<br>**Default:** `true`
 | `headerTemplate`        | *Optional* - The text template to use for the module header text when there is at least one stream displayed. The sting `"{header_text}"` will be replaced with the module's header text. The string `"{play_count}"` will be replaced with the number of streams displayed. <br>**Type:** `string`<br>**Default:** `"{header_text} ({play_count})"`
-| `headerTemplateZero`    | *Optional* - The text template to use for the module header text when there are no streams displayed. The sting `"{header_text}"` will be replaced with the module's header text. The string `"{play_count}"` will be replaced with the number of streams displayed. <br>**Type:** `string`<br>**Default:** `"{header_text} ({play_count})"`
+| `headerTemplateZero`    | *Optional* - The text template to use for the module header text when there are no streams displayed. The sting `"{header_text}"` will be replaced with the module's header text. The string `"{play_count}"` will be replaced with the number of streams displayed. <br>**Type:** `string`<br>**Default:** `"{header_text}"`
 | `hideWhenNothingPlaying`| *Optional* - When `true`, this module will be completely hidden when there are no streams.<br>**Type:** `boolean`<br>**Default:** `false`
 | `enableProgressTimer`   | *Optional* - When `true`, the progress bars will be incremented between data updates from the server.  This makes the progress bar animation smoother with smaller jumps, which is especially noticeable with shorter media files, such as music.<br>**Type:** `boolean`<br>**Default:** `true`
 | `networkFilter`         | *Optional* - Whether to show only Local streams, only Remote streams of Both. <br>**Type:** `string`<br>**Default:** `"both"`<br>**Options:** `"local"`, `"remote"`, `"both"`
