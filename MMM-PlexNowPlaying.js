@@ -327,6 +327,7 @@ Module.register("MMM-PlexNowPlaying", {
 					item.duration = xmlItem.getAttribute("duration");
 					item.viewOffset = xmlItem.getAttribute("viewOffset");
 					item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey");
+					item.isLive = xmlItem.getAttribute("live") === '1';
 					break;
 				case "track": // Get Audio Track Details
 					item.bannerImg = xmlItem.getAttribute("art"); // "/library/metadata/128396/art/1570920387"
@@ -589,6 +590,12 @@ Module.register("MMM-PlexNowPlaying", {
 						dataCell.appendChild(document.createTextNode(item.seriesTitle));
 						secondary = document.createElement("div");
 						secondary.setAttribute("class", "secondary-text");
+						if (item.isLive) {
+							secondary.innerHTML += "Live";
+							if (item.seasonNumber || item.episodeNumber) {
+								secondary.innerHTML += ": ";
+							}
+						}
 						if (item.seasonNumber) {
 							secondary.innerHTML += "S" + item.seasonNumber;
 						}
@@ -598,7 +605,6 @@ Module.register("MMM-PlexNowPlaying", {
 							}
 							secondary.innerHTML += "E" + item.episodeNumber;
 						}
-						
 						dataCell.appendChild(secondary);
 						if (item.seriesPosterImg || item.seasonPosterImg) {
 							imageCell.setAttribute("class", "posterImgCell");
