@@ -251,6 +251,9 @@ Module.register("MMM-PlexNowPlaying", {
 	 * @return (string) The fully qualified URL for the requested endpoint
 	 */
 	buildURL: function(endpoint) {
+		if (endpoint.indexOf('http') === 0) {
+			return endpoint;
+		}
 		var self = this;
 		endpoint = this.trailingSlashIt(endpoint);
 		endpoint = this.leadingSlashIt(endpoint);
