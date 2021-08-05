@@ -251,6 +251,9 @@ Module.register("MMM-PlexNowPlaying", {
 	 * @return (string) The fully qualified URL for the requested endpoint
 	 */
 	buildURL: function(endpoint) {
+		if (endpoint.indexOf('http') === 0) {
+			return endpoint;
+		}
 		var self = this;
 		endpoint = this.trailingSlashIt(endpoint);
 		endpoint = this.leadingSlashIt(endpoint);
@@ -324,6 +327,7 @@ Module.register("MMM-PlexNowPlaying", {
 					item.duration = xmlItem.getAttribute("duration");
 					item.viewOffset = xmlItem.getAttribute("viewOffset");
 					item.libraryEndpoint = xmlItem.getAttribute("librarySectionKey");
+					item.isLive = xmlItem.getAttribute("live") === '1';
 					break;
 				case "track": // Get Audio Track Details
 					item.bannerImg = xmlItem.getAttribute("art"); // "/library/metadata/128396/art/1570920387"
@@ -586,7 +590,21 @@ Module.register("MMM-PlexNowPlaying", {
 						dataCell.appendChild(document.createTextNode(item.seriesTitle));
 						secondary = document.createElement("div");
 						secondary.setAttribute("class", "secondary-text");
-						secondary.innerHTML += "S" + item.seasonNumber + " &bull; E" + item.episodeNumber;
+						if (item.isLive) {
+							secondary.innerHTML += "Live";
+							if (item.seasonNumber || item.episodeNumber) {
+								secondary.innerHTML += ": ";
+							}
+						}
+						if (item.seasonNumber) {
+							secondary.innerHTML += "S" + item.seasonNumber;
+						}
+						if (item.episodeNumber) {
+							if (item.seasonNumber) {
+								secondary.innerHTML += " &bull; ";
+							}
+							secondary.innerHTML += "E" + item.episodeNumber;
+						}
 						dataCell.appendChild(secondary);
 						if (item.seriesPosterImg || item.seasonPosterImg) {
 							imageCell.setAttribute("class", "posterImgCell");
