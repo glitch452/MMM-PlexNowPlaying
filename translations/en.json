@@ -1,7 +1,6 @@
 {
 	"SUSPENDED": "Suspended",
 	"RESUMED": "Resumed",
-	"LOADING": "Loading &hellip;",
 	"INITIAL_DELAY": "Initial delay set. Starting in {seconds} second(s). ",
 	"UPDATE_SCHEDULED": "Update scheduled to run automatically every {seconds} second(s). ",
 	"DATA_FAILURE_RETRY": "Error retrieving data from the Plex server, trying again in {retryTimeInSeconds} seconds. ",
