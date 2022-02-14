@@ -1,0 +1,11 @@
+{
+	"SUSPENDED": "Angehalten",
+	"RESUMED": "Fortgesetzt",
+	"LOADING": "Lade &hellip;",
+	"INITIAL_DELAY": "Startverzögerung gesetzt, starte in {seconds} Sekunde(n). ",
+	"UPDATE_SCHEDULED": "Automatische aktualisierung alle {seconds} Sekunde(n) geplant. ",
+	"DATA_FAILURE_RETRY": "Fehler bei der Datenabfrage vom Plex Server, neuer Versuch in {retryTimeInSeconds} Sekunde(n). ",
+	"DATA_REQUESTED": "Anfrage zur Datenabfrage an Plex Server gesendet. ",
+	"DATA_SUCCESS": "Daten von Plex Server empfangen nach {numberOfAttempts} Versuch(en). ",
+	"DATA_FAILURE": "Fehler bei der Abfrage vom Plex Server. "
+}
