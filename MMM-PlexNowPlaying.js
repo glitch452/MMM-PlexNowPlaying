@@ -910,6 +910,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 */
 	getTranslations: function() {
 		return {
+			de: "translations/de.json",
 			en: "translations/en.json"
 		};
 	},
